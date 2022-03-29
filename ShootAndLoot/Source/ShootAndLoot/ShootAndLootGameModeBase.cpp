@@ -3,6 +3,7 @@
 
 #include "ShootAndLootGameModeBase.h"
 #include "PlayerCharacter.h"
+#include "MyHUD.h"
 
 
 AShootAndLootGameModeBase::AShootAndLootGameModeBase()
@@ -12,4 +13,6 @@ AShootAndLootGameModeBase::AShootAndLootGameModeBase()
 	{
 		DefaultPawnClass = BP_Char.Class;
 	}
+
+	HUDClass = AMyHUD::StaticClass();
 }
