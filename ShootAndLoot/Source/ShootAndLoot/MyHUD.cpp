@@ -21,6 +21,7 @@ void AMyHUD::DrawHUD()
 {
 	Super::DrawHUD();
 
+	// TODO: 플레이어 캐릭터에서 조준점 받아와서 설정하는 것으로 변경
 	FVector2D Center;
 	Canvas->GetCenter(Center.X, Center.Y);
 	const FVector2D DrawPos(Center.X - CrosshairTex->GetSizeX() * 0.5f, Center.Y - CrosshairTex->GetSizeY() * 0.5f);

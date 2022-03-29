@@ -9,9 +9,40 @@
 /**
  * 
  */
+
+class AThirdPlayerCharacter;
+
 UCLASS()
 class SHOOTANDLOOT_API UPlayerAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
-	
+
+public:
+	/** UpdateAnimation이 가상 함수가 아니므로 블프에서 연결 */
+	UFUNCTION(BlueprintCallable)
+	void UpdateAnimationProperties(float DeltaTime);
+
+	virtual void NativeInitializeAnimation() override;
+
+private:
+	// Pawn Owner 저장용
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	AThirdPlayerCharacter* PlayerCharacter;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float Speed;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float VerticalDir;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float HorizontalDir;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float AimRotationPitch;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	bool bIsInAir;
+
+
 };
