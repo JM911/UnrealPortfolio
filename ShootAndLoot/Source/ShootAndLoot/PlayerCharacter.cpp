@@ -9,6 +9,9 @@
 #include "Projectile.h"
 #include "Engine/World.h"
 
+#include "ShootAndLootGameModeBase.h"
+#include "MyHUD.h"
+
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
@@ -38,6 +41,13 @@ void APlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// 카메라 기본 거리 설정
+	if (PlayerCamera)
+	{
+		CameraDefaultFOV = PlayerCamera->FieldOfView;
+		CameraCurrentFOV = CameraDefaultFOV;
+	}
+
 	// TODO: 무기 착용 리팩토링
 	//// 무기 착용_1안
 	//auto DefaultWeapon = GetWorld()->SpawnActor<AWeapon>(FVector::ZeroVector, FRotator::ZeroRotator);
@@ -53,13 +63,12 @@ void APlayerCharacter::BeginPlay()
 	AWeapon* DefaultWeapon = nullptr;
 	{
 		DefaultWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
-		//UE_LOG(LogTemp, Warning, TEXT("Spawn Weapon"));
+		CurWeapon = DefaultWeapon;
 	}
 	const USkeletalMeshSocket* RightHandSocket = GetMesh()->GetSocketByName(FName("RightHandSocket"));
 	if (RightHandSocket && DefaultWeapon)
 	{
 		RightHandSocket->AttachActor(DefaultWeapon, GetMesh());
-		//UE_LOG(LogTemp, Warning, TEXT("Attach Weapon"));
 	}
 
 	// CrosshairLocation 설정
@@ -100,45 +109,145 @@ void APlayerCharacter::SetCrosshairLocation(float offsetX, float offsetY)
 	CrosshairLocation = FVector2D(ViewportSize.X / 2.f + offsetX, ViewportSize.Y / 2.f + offsetY);
 }
 
-bool APlayerCharacter::GetBeamEndLocation(const FVector& BarrelSocketLocation, FVector& BeamEndLocation)
+void APlayerCharacter::FireButtonPressed()
 {
-	// 조준선 월드 위치, 월드 방향 계산
-	FVector CrosshairWorldPos;
-	FVector CrosshairWorldDir;
+	bIsAttacking = true;
+	StartFireTimer();
+}
+
+void APlayerCharacter::FireButtonReleased()
+{
+	bIsAttacking = false;
+}
+
+void APlayerCharacter::StartFireTimer()
+{
+	if (bFireEnable && CurWeapon)
+	{
+		FireWeapon();
+		bFireEnable = false;
+		GetWorldTimerManager().SetTimer(
+			AutoFireTimer,
+			this,
+			&APlayerCharacter::AutoFireReset,
+			CurWeapon->GetAttackInterval());
+	}
+}
+
+void APlayerCharacter::AutoFireReset()
+{
+	bFireEnable = true;
+	if (bIsAttacking)
+	{
+		StartFireTimer();
+	}
+}
+
+void APlayerCharacter::FireWeapon()
+{
+	// TODO: 조준선 위치 구해서 대입
+	FVector AimTargetLocation{ 0.f };
+	FHitResult OutHitResult;
+
+	TraceUnderCrosshair(OutHitResult, AimTargetLocation);
+	CurWeapon->FireProjectile(AimTargetLocation);
+}
+
+bool APlayerCharacter::TraceUnderCrosshair(FHitResult& OutHitResult, FVector& OutHitLocation)
+{
+	FVector CrosshairWorldPosition;
+	FVector CrosshairWorldDirecton;
 
 	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(
 		UGameplayStatics::GetPlayerController(this, 0),
 		CrosshairLocation,
-		CrosshairWorldPos,
-		CrosshairWorldDir);
+		CrosshairWorldPosition,
+		CrosshairWorldDirecton);
 
 	if (bScreenToWorld)
 	{
-		// 조준선의 끝 지점 계산 (충돌체가 있으면 그 지점으로, 없으면 적당히 멀리)
-		const FVector Start{ CrosshairWorldPos };
-		const FVector End{ Start + CrosshairWorldDir * 50'000.f };
-
-		// TODO
+		// Trace from Crosshair world location outward
+		const FVector Start{ CrosshairWorldPosition };
+		const FVector End{ Start + CrosshairWorldDirecton * 50'000.f };
+		OutHitLocation = End;
+		GetWorld()->LineTraceSingleByChannel(
+			OutHitResult,
+			Start,
+			End,
+			ECollisionChannel::ECC_Visibility);
+		if (OutHitResult.bBlockingHit)
+		{
+			OutHitLocation = OutHitResult.Location;
+			return true;
+		}
 	}
 
 	return false;
 }
 
-void APlayerCharacter::FireWeapon()
+void APlayerCharacter::AimButtonPressed()
 {
-	const USkeletalMeshSocket* BarrelSocket = GetMesh()->GetSocketByName(FName("BarrelSocket"));
-	if (BarrelSocket)
+	bAiming = true;
+}
+
+void APlayerCharacter::AimButtonReleased()
+{
+	bAiming = false;
+}
+
+void APlayerCharacter::AimingCameraZoom(float DeltaTime)
+{
+	if (bAiming)
 	{
-		// Test
-		const FTransform SocketTransform = BarrelSocket->GetSocketTransform(GetMesh());
-		UWorld* World = GetWorld();
-		if (World && CurrentProjectileClass)
-		{
-			World->SpawnActor<AProjectile>(
-				CurrentProjectileClass,
-				SocketTransform);
-		}
+		CameraCurrentFOV = FMath::FInterpTo(
+			CameraCurrentFOV,
+			CameraZoomedFOV,
+			DeltaTime,
+			ZoomInterpSpeed);
 	}
+	else
+	{
+		CameraCurrentFOV = FMath::FInterpTo(
+			CameraCurrentFOV,
+			CameraDefaultFOV,
+			DeltaTime,
+			ZoomInterpSpeed);
+	}
+	if (PlayerCamera)
+	{
+		PlayerCamera->SetFieldOfView(CameraCurrentFOV);
+	}
+}
+
+void APlayerCharacter::Reload()
+{
+	if (bIsReloading)
+		return;
+
+	if (CurWeapon)
+	{
+		if (CurWeapon->IsMagazineFull())
+			return;
+
+		bIsReloading = true;
+		bFireEnable = false;
+		GetWorldTimerManager().SetTimer(
+			ReloadTimer,
+			this,
+			&APlayerCharacter::ReloadEnd,
+			CurWeapon->GetReloadTime());
+	}
+}
+
+void APlayerCharacter::ReloadEnd()
+{
+	bFireEnable = true;
+	bIsReloading = false;
+	CurWeapon->Reload();
+}
+
+void APlayerCharacter::TempRefreshUI()
+{
 
 }
 
@@ -147,6 +256,8 @@ void APlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	// 조준 버튼 체크 및 카메라 설정
+	AimingCameraZoom(DeltaTime);
 }
 
 // Called to bind functionality to input
@@ -161,9 +272,15 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &APawn::AddControllerYawInput);
 	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &APawn::AddControllerPitchInput);
 
+	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Pressed, this, &APlayerCharacter::AimButtonPressed);
+	PlayerInputComponent->BindAction(TEXT("Aim"), IE_Released, this, &APlayerCharacter::AimButtonReleased);
+
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Released, this, &ACharacter::StopJumping);
 
-	PlayerInputComponent->BindAction(TEXT("Fire"), IE_Pressed, this, &APlayerCharacter::FireWeapon);
+	PlayerInputComponent->BindAction(TEXT("Fire"), IE_Pressed, this, &APlayerCharacter::FireButtonPressed);
+	PlayerInputComponent->BindAction(TEXT("Fire"), IE_Released, this, &APlayerCharacter::FireButtonReleased);
+
+	PlayerInputComponent->BindAction(TEXT("Reload"), IE_Pressed, this, &APlayerCharacter::Reload);
 }
 

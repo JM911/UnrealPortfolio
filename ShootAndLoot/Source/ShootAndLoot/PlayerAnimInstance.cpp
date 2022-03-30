@@ -24,12 +24,12 @@ void UPlayerAnimInstance::UpdateAnimationProperties(float DeltaTime)
 		//Direction = CalculateDirection(PlayerCharacter->GetVelocity(), PlayerCharacter->GetActorRotation());
 
 		// 방향 (-180 ~ 180)
-		//FRotator AimRotation = PlayerCharacter->GetBaseAimRotation();
-		//FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(
-		//	PlayerCharacter->GetVelocity());
-		//MovementOffsetYaw = UKismetMathLibrary::NormalizedDeltaRotator(
-		//	MovementRotation,
-		//	AimRotation).Yaw;
+		FRotator AimRotation = PlayerCharacter->GetBaseAimRotation();
+		FRotator MovementRotation = UKismetMathLibrary::MakeRotFromX(
+			PlayerCharacter->GetVelocity());
+		MovementOffsetYaw = UKismetMathLibrary::NormalizedDeltaRotator(
+			MovementRotation,
+			AimRotation).Yaw;
 
 		// 이동 방향 (-1 ~ 1)
 		VerticalDir = PlayerCharacter->GetUpDownValue();
@@ -40,6 +40,9 @@ void UPlayerAnimInstance::UpdateAnimationProperties(float DeltaTime)
 
 		// 점프 판정
 		bIsInAir = PlayerCharacter->GetCharacterMovement()->IsFalling();
+
+		// 조준 판정
+		bIronSight = PlayerCharacter->GetIronSight();
 	}
 }
 

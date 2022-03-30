@@ -16,6 +16,8 @@ UCLASS()
 class SHOOTANDLOOT_API UPlayerAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
+		
+private:
 
 public:
 	/** UpdateAnimation이 가상 함수가 아니므로 블프에서 연결 */
@@ -33,6 +35,9 @@ private:
 	float Speed;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	float MovementOffsetYaw;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float VerticalDir;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
@@ -43,6 +48,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	bool bIsInAir;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	bool bIronSight;
 
 
 };

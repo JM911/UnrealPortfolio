@@ -2,6 +2,7 @@
 
 
 #include "Projectile.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
 // Sets default values
 AProjectile::AProjectile()
@@ -11,6 +12,8 @@ AProjectile::AProjectile()
 
 	ProjMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjMesh"));
 	SetRootComponent(ProjMesh);
+
+	ProjMove = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjMove"));
 }
 
 // Called when the game starts or when spawned
@@ -19,7 +22,8 @@ void AProjectile::BeginPlay()
 	Super::BeginPlay();
 	
 	// 투사체는 중력영향 없이 일직선으로 발사
-	ProjMesh->SetEnableGravity(false);
+	//ProjMesh->SetEnableGravity(false);
+	ProjMove->ProjectileGravityScale = 0.f;
 	ProjMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
 

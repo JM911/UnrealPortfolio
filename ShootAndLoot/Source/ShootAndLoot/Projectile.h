@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Projectile.generated.h"
 
+class UProjectileMovementComponent;
+
 UCLASS()
 class SHOOTANDLOOT_API AProjectile : public AActor
 {
@@ -26,4 +28,11 @@ public:
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Item Properties", meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* ProjMesh;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Move", meta = (AllowPrivateAccess = "true"))
+	UProjectileMovementComponent* ProjMove;
+
+public:
+	FORCEINLINE UStaticMeshComponent* GetStaticMesh() const { return ProjMesh; }
+	FORCEINLINE UProjectileMovementComponent* GetProjMove() const { return ProjMove; }
 };

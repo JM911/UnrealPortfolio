@@ -4,6 +4,9 @@
 #include "ThirdPlayerCharacter.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Engine/SkeletalMeshSocket.h"
+#include "Weapon.h"
 
 // Sets default values
 AThirdPlayerCharacter::AThirdPlayerCharacter()
@@ -23,17 +26,37 @@ AThirdPlayerCharacter::AThirdPlayerCharacter()
 	PlayerCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	PlayerCamera->bUsePawnControlRotation = false;
 
-	//// Don't rotate when the controller rotates. Let the controller only affect the camera.
-	//bUseControllerRotationPitch = false;
-	//bUseControllerRotationYaw = true;
-	//bUseControllerRotationRoll = false;
+	// Don't rotate when the controller rotates. Let the controller only affect the camera.
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationYaw = true;
+	bUseControllerRotationRoll = false;
 }
 
 // Called when the game starts or when spawned
 void AThirdPlayerCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 카메라 기본 거리 설정
+	if (PlayerCamera)
+	{
+		CameraDefaultFOV = PlayerCamera->FieldOfView;
+		CameraCurrentFOV = CameraDefaultFOV;
+	}
 	
+	// TODO: 함수로 리팩토링
+	AWeapon* DefaultWeapon = nullptr;
+	{
+		DefaultWeapon = GetWorld()->SpawnActor<AWeapon>(DefaultWeaponClass);
+		//UE_LOG(LogTemp, Warning, TEXT("Spawn Weapon"));
+		CurWeapon = DefaultWeapon;
+	}
+	const USkeletalMeshSocket* RightHandSocket = GetMesh()->GetSocketByName(FName("RightHandSocket"));
+	if (RightHandSocket && DefaultWeapon)
+	{
+		RightHandSocket->AttachActor(DefaultWeapon, GetMesh());
+		//UE_LOG(LogTemp, Warning, TEXT("Attach Weapon"));
+	}
 }
 
 void AThirdPlayerCharacter::MoveForward(float Value)
@@ -64,10 +87,60 @@ void AThirdPlayerCharacter::MoveRight(float Value)
 	}
 }
 
+void AThirdPlayerCharacter::IronSightPressed()
+{
+	bIronSight = true;
+}
+
+void AThirdPlayerCharacter::IronSightReleased()
+{
+	bIronSight = false;
+}
+
+void AThirdPlayerCharacter::IronSightCameraZoom(float DeltaTime)
+{
+	if (bIronSight)
+	{
+		CameraCurrentFOV = FMath::FInterpTo(
+			CameraCurrentFOV,
+			CameraZoomedFOV,
+			DeltaTime,
+			ZoomInterpSpeed);
+	}
+	else
+	{
+		CameraCurrentFOV = FMath::FInterpTo(
+			CameraCurrentFOV,
+			CameraDefaultFOV,
+			DeltaTime,
+			ZoomInterpSpeed);
+	}
+	if (PlayerCamera)
+	{
+		PlayerCamera->SetFieldOfView(CameraCurrentFOV);
+	}
+}
+
+void AThirdPlayerCharacter::FireWeapon()
+{
+	// TODO: 공격 완성
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance && FireMontage)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("asdf"));
+		AnimInstance->Montage_Play(FireMontage);
+		AnimInstance->Montage_JumpToSection(FName("StartFire"));
+	}
+}
+
 // Called every frame
 void AThirdPlayerCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	// 매 틱마다 조준 체크, 카메라 설정
+	IronSightCameraZoom(DeltaTime);
 
 }
 
@@ -86,5 +159,9 @@ void AThirdPlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInp
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction(TEXT("Jump"), IE_Released, this, &ACharacter::StopJumping);
 
+	PlayerInputComponent->BindAction(TEXT("IronSight"), IE_Pressed, this, &AThirdPlayerCharacter::IronSightPressed);
+	PlayerInputComponent->BindAction(TEXT("IronSight"), IE_Released, this, &AThirdPlayerCharacter::IronSightReleased);
+
+	PlayerInputComponent->BindAction(TEXT("Fire"), IE_Pressed, this, &AThirdPlayerCharacter::FireWeapon);
 }
 

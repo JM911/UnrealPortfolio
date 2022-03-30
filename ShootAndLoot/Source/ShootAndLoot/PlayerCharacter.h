@@ -29,8 +29,24 @@ protected:
 
 	// 공격 관련
 	void SetCrosshairLocation(float offsetX, float offsetY);
-	bool GetBeamEndLocation(const FVector& BarrelSocketLocation, FVector& BeamEndLocation);
+
+	void FireButtonPressed();
+	void FireButtonReleased();
+	void StartFireTimer();
+	void AutoFireReset();
+
 	void FireWeapon();
+	bool TraceUnderCrosshair(FHitResult& OutHitResult, FVector& OutHitLocation);
+
+	// 조준
+	void AimButtonPressed();
+	void AimButtonReleased();
+	void AimingCameraZoom(float DeltaTime);
+
+	// 재장전
+	void Reload();
+	void ReloadEnd();
+	void TempRefreshUI();
 
 public:	
 	// Called every frame
@@ -41,23 +57,43 @@ public:
 
 		
 private:
-	/** 플레이어 1인칭 카메라 */
+	/* Components */
+	// 플레이어 1인칭 카메라
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* PlayerCamera;
 
-	/** (블프용) 기본 무기 클래스 설정 변수 */
+	/* Attack */
+	// (블프용) 기본 무기 클래스 설정 변수
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<AWeapon> DefaultWeaponClass;
 
+	// 현재 장착 중인 무기
+	AWeapon* CurWeapon;
+
+	// 클릭 홀드 시 연발 사격 관련
+	bool bIsAttacking = false;
+	bool bFireEnable = true;
+	FTimerHandle AutoFireTimer;
+
+	// 조준점 위치
 	FVector2D CrosshairLocation = FVector2D(0.f, 0.f);
 
-	/** 투사체 클래스 설정 변수 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<AProjectile> CurrentProjectileClass;
-	
+	// 투사체 클래스 설정 변수
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	//TSubclassOf<AProjectile> CurrentProjectileClass;
+
+	// 조준 애니메이션 관련
+	bool bAiming = false;
+	float CameraDefaultFOV = 0.f;
+	float CameraZoomedFOV = 35.f;
+	float CameraCurrentFOV = 0.f;
+	float ZoomInterpSpeed = 20.f;
+
+	// 재장전 관련
+	FTimerHandle ReloadTimer;
+	bool bIsReloading = false;
 
 public:
 	FORCEINLINE FVector2D GetCrosshairLocation() const { return CrosshairLocation; }
-
 
 };

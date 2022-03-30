@@ -29,5 +29,5 @@ private:
 	USkeletalMeshComponent* ItemMesh;
 
 public:
-
+	USkeletalMeshComponent* GetItemMesh() const { return ItemMesh; }
 };
