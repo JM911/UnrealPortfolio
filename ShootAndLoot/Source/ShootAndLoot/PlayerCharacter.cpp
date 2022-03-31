@@ -170,11 +170,17 @@ bool APlayerCharacter::TraceUnderCrosshair(FHitResult& OutHitResult, FVector& Ou
 		const FVector Start{ CrosshairWorldPosition };
 		const FVector End{ Start + CrosshairWorldDirecton * 50'000.f };
 		OutHitLocation = End;
+
+		FCollisionQueryParams TestParams;
+		TestParams.AddIgnoredActor(this);
+
 		GetWorld()->LineTraceSingleByChannel(
 			OutHitResult,
 			Start,
 			End,
-			ECollisionChannel::ECC_Visibility);
+			ECollisionChannel::ECC_Pawn,
+			TestParams);
+
 		if (OutHitResult.bBlockingHit)
 		{
 			OutHitLocation = OutHitResult.Location;

@@ -7,6 +7,7 @@
 #include "Projectile.generated.h"
 
 class UProjectileMovementComponent;
+class USphereComponent;
 
 UCLASS()
 class SHOOTANDLOOT_API AProjectile : public AActor
@@ -17,9 +18,15 @@ public:
 	// Sets default values for this actor's properties
 	AProjectile();
 
+private:
+
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UFUNCTION()
+	void OnHit(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComponent, FVector NormalImpulse, const FHitResult& Hit);
 
 public:	
 	// Called every frame
@@ -31,6 +38,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Move", meta = (AllowPrivateAccess = "true"))
 	UProjectileMovementComponent* ProjMove;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Move", meta = (AllowPrivateAccess = "true"))
+	USphereComponent* CollisionSphere;
 
 public:
 	FORCEINLINE UStaticMeshComponent* GetStaticMesh() const { return ProjMesh; }

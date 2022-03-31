@@ -6,9 +6,24 @@
 #include "Engine/SkeletalMeshSocket.h"
 #include "GameFramework/ProjectileMovementComponent.h"
 
+#include "MyUserWidget.h"
+#include "Components/TextBlock.h"
+
 AWeapon::AWeapon()
 {
+	PrimaryActorTick.bCanEverTick = true;
 
+	// User Widget 로드 & 뷰포트 추가
+	static ConstructorHelpers::FClassFinder<UMyUserWidget> TestAmmoUI(TEXT("WidgetBlueprint'/Game/_ShootAndLoot/UI/WBP_TestUI.WBP_TestUI_C'"));
+	if (TestAmmoUI.Succeeded())
+	{
+		UW_Class = TestAmmoUI.Class;
+		CurrentWidget = CreateWidget(GetWorld(), UW_Class);
+		if (CurrentWidget)
+		{
+			CurrentWidget->AddToViewport();
+		}
+	}
 }
 
 void AWeapon::BeginPlay()
@@ -16,6 +31,23 @@ void AWeapon::BeginPlay()
 	Super::BeginPlay();
 
 	Reload();
+	RefreshUI();
+}
+
+void AWeapon::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+}
+
+void AWeapon::RefreshUI()
+{
+	UMyUserWidget* CurMyWidget = Cast<UMyUserWidget>(CurrentWidget);
+	if (CurMyWidget)
+	{
+		const FString AmmoStr = FString::Printf(TEXT("Ammo %02d / %02d\nTotal Ammo %03d"),
+			AmmoCount, MagazineCount, TotalAmmoCount);
+		CurMyWidget->AmmoText->SetText(FText::FromString(AmmoStr));
+	}
 }
 
 void AWeapon::Reload()
@@ -24,6 +56,8 @@ void AWeapon::Reload()
 
 	AmmoCount = MagazineCount;
 	TotalAmmoCount -= DiffBetweenAmmoAndMag;
+
+	RefreshUI();
 }
 
 void AWeapon::FireProjectile(const FVector& TargetLocation)
@@ -49,4 +83,6 @@ void AWeapon::FireProjectile(const FVector& TargetLocation)
 		// 탄약 업데이트
 		AmmoCount--;
 	}
+
+	RefreshUI();
 }

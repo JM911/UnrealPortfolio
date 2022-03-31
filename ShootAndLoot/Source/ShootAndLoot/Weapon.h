@@ -22,6 +22,9 @@ public:
 
 private:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+
+	void RefreshUI();
 	
 private:
 	/** 투사체 클래스 설정 변수 */
@@ -40,6 +43,13 @@ private:
 	//int32 MaxAmmoCount = 500;
 	float ReloadTime = 1.f;
 	// TODO: 무한 탄약 옵션 추가
+
+	// UI 관련
+	UPROPERTY()
+	TSubclassOf<UUserWidget> UW_Class;
+
+	UPROPERTY()
+	UUserWidget* CurrentWidget;
 
 public:
 	FORCEINLINE float GetAttackInterval() const { return AttackInterval; }
