@@ -37,6 +37,9 @@ protected:
 	void Reload();
 	void ReloadEnd();
 
+	// 탄약 관련 UI 업데이트
+	void UpdatePlayerHUD();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

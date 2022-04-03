@@ -28,4 +28,8 @@ private:
 
 	UPROPERTY()
 	UUserWidget* CurrentWidget;
+
+
+public:
+	FORCEINLINE UUserWidget* GetCurrentWidget() const { return CurrentWidget; }
 };

@@ -13,5 +13,12 @@ UCLASS()
 class LOOTANDSHOOT_API UPlayerHUD : public UUserWidget
 {
 	GENERATED_BODY()
+
+private:
+	UPROPERTY(meta = (BindWidget))
+	class UTextBlock* AmmoText;
+
+public:
+	FORCEINLINE UTextBlock* GetAmmoText() const { return AmmoText; }
 	
 };

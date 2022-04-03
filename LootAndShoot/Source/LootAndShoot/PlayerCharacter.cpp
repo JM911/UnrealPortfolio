@@ -7,6 +7,11 @@
 
 #include "Projectile.h"
 
+#include "MyGameMode.h"
+#include "Kismet/GameplayStatics.h"
+#include "PlayerHUD.h"
+#include "Components/TextBlock.h"
+
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
@@ -158,6 +163,23 @@ void APlayerCharacter::ReloadEnd()
 	UE_LOG(LogTemp, Warning, TEXT("Realod Complete!"));
 }
 
+void APlayerCharacter::UpdatePlayerHUD()
+{
+	AMyGameMode* CurGameMode = Cast<AMyGameMode>(UGameplayStatics::GetGameMode(GetWorld()));
+
+	if (CurGameMode)
+	{
+		UPlayerHUD* CurHUD = Cast<UPlayerHUD>(CurGameMode->GetCurrentWidget());
+		if (CurHUD)
+		{
+			const FString AmmoStr = FString::Printf(TEXT("Ammo %02d/%02d\nTotal %03d"),
+				CurrentBullet, MagazineBullet, TotalBullet);
+
+			CurHUD->GetAmmoText()->SetText(FText::FromString(AmmoStr));
+		}
+	}
+}
+
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
@@ -165,6 +187,9 @@ void APlayerCharacter::Tick(float DeltaTime)
 
 	// 투사체 연사 체크
 	FireFinal();
+	
+	// 탄약 관련 UI 업데이트
+	UpdatePlayerHUD();
 }
 
 // Called to bind functionality to input
