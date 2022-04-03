@@ -44,7 +44,7 @@ void AEnemyAIController::OnUnPossess()
 {
 	Super::OnUnPossess();
 
-	GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
+	//GetWorld()->GetTimerManager().ClearTimer(TimerHandle);
 }
 
 void AEnemyAIController::RandomMove()
