@@ -4,6 +4,10 @@
 #include "Enemy.h"
 
 #include "Components/CapsuleComponent.h"
+#include "Components/BoxComponent.h"
+#include "Projectile.h"
+
+#include "Kismet/KismetMathLibrary.h"
 
 
 // Sets default values
@@ -36,14 +40,42 @@ AEnemy::AEnemy()
 	// 머리 메쉬 설정
 	Head = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Head"));
 	Head->SetupAttachment(MainBodyMesh);
-	
+
+
+	// 충돌 박스 설정
+	DamageCollisionBox = CreateDefaultSubobject<UBoxComponent>(TEXT("Damage Collision Box"));
+	DamageCollisionBox->SetupAttachment(MainBodyMesh);
 }
 
 // Called when the game starts or when spawned
 void AEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// 충돌 함수 설정
+	DamageCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnHit);
 	
+}
+
+//void AEnemy::PostInitializeComponents()
+//{
+//	Super::PostInitializeComponents();
+//}
+
+void AEnemy::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& Hit)
+{
+	AProjectile* Projectile = Cast<AProjectile>(OtherActor);
+
+	if (Projectile)//&& OtherActor->ActorHasTag("Projectile"))	// 굳이 둘 다 체크해야 할까?
+	{
+		// 리팩토링 고려...
+		CurrentHp -= Projectile->GetDamageValue();
+		
+		if (UKismetMathLibrary::NearlyEqual_FloatFloat(CurrentHp, 0.f))
+		{
+			Destroy();
+		}
+	}
 }
 
 // Called every frame

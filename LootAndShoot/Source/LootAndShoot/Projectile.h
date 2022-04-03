@@ -43,4 +43,7 @@ private:
 	// °ø°Ý·Â
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	float DamageValue = 20.f;
+
+public:
+	FORCEINLINE float GetDamageValue() const { return DamageValue; }
 };

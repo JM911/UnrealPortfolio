@@ -91,6 +91,9 @@ void APlayerCharacter::FireProjectile()
 
 void APlayerCharacter::FireButtonPressed()
 {
+	if (bReloading)
+		return;
+
 	bFireButtonPressed = true;
 }
 

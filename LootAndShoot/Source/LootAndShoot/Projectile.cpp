@@ -29,6 +29,9 @@ AProjectile::AProjectile()
 	// 투사체 수명
 	InitialLifeSpan = 3.f;
 
+	// 태그 설정
+	Tags.Add("Projectile");
+
 }
 
 // Called when the game starts or when spawned
@@ -36,13 +39,14 @@ void AProjectile::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// 충돌 설정
 	CollisionSphere->OnComponentBeginOverlap.AddDynamic(this, &AProjectile::OnHit);
-	
 }
 
 void AProjectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& Hit)
 {
 	// TODO
+	Destroy();	// 뭐랑 충돌하든 투사체 소멸
 }
 
 // Called every frame

@@ -29,7 +29,7 @@ void AEnemyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
-	GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AEnemyAIController::RandomMove, 2.f, true);
+	//GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AEnemyAIController::RandomMove, 2.f, true);
 
 	if (UseBlackboard(BlackboardData, Blackboard))
 	{
