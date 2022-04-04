@@ -6,6 +6,8 @@
 #include "GameFramework/Character.h"
 #include "Enemy.generated.h"
 
+DECLARE_MULTICAST_DELEGATE(FOnAttackEnd);
+
 UCLASS()
 class LOOTANDSHOOT_API AEnemy : public ACharacter
 {
@@ -22,9 +24,13 @@ protected:
 	//virtual void PostInitializeComponents() override;
 
 
-	// 피격 함수
+	// 피격 함수(충돌)
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& Hit);
+
+	// 애니메이션
+	UFUNCTION()
+	void OnAnimMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
 
 public:	
@@ -64,4 +70,18 @@ private:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Collision, meta = (AllowPrivateAccess = "true"))
 	float MaxHp = 100.f;
+
+	UPROPERTY()
+	class UEnemyAnimInstance* AnimInstanceBody;
+
+	UPROPERTY()
+	class UEnemyAnimInstance* AnimInstanceHead;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
+	bool bIsAttacking = false;
+
+public:
+	// 공격
+	void Attack();
+	FOnAttackEnd OnAttackEnd;
 };

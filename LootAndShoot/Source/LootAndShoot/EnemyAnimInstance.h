@@ -14,11 +14,15 @@ class LOOTANDSHOOT_API UEnemyAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 
+public:
+	UEnemyAnimInstance();
+
 protected:
 	UFUNCTION(BlueprintCallable)
 	void UpdateAnimationProperties(float DeltaTime);
 
 	virtual void NativeInitializeAnimation() override;
+
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
@@ -27,6 +31,12 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
 	float Speed;
 
+	// 공격 애니메이션 몽타주 (블프에서 설정)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat, Meta = (AllowPrivateAccess = true))
+	UAnimMontage* AttackMontage;
 
-	
+		
+public:
+	void PlayAttackMontage();
+	void AttackMontageJumpToSection();
 };

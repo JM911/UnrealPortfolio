@@ -132,7 +132,7 @@ void APlayerCharacter::FireFinal()
 		CurrentBullet--;
 
 		// 디버그용
-		UE_LOG(LogTemp, Warning, TEXT("%d / %d , %d"), CurrentBullet, MagazineBullet, TotalBullet);
+		//UE_LOG(LogTemp, Warning, TEXT("%d / %d , %d"), CurrentBullet, MagazineBullet, TotalBullet);
 	}
 }
 
@@ -160,7 +160,7 @@ void APlayerCharacter::ReloadEnd()
 	TotalBullet -= BulletDiff;
 
 	// 디버그용
-	UE_LOG(LogTemp, Warning, TEXT("Realod Complete!"));
+	//UE_LOG(LogTemp, Warning, TEXT("Realod Complete!"));
 }
 
 void APlayerCharacter::UpdatePlayerHUD()

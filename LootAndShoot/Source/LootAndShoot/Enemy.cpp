@@ -9,6 +9,8 @@
 
 #include "Kismet/KismetMathLibrary.h"
 
+#include "EnemyAnimInstance.h"
+
 
 // Sets default values
 AEnemy::AEnemy()
@@ -54,6 +56,19 @@ void AEnemy::BeginPlay()
 
 	// 충돌 함수 설정
 	DamageCollisionBox->OnComponentBeginOverlap.AddDynamic(this, &AEnemy::OnHit);
+
+	// 애님 인스턴스 및 몽타주 설정
+	AnimInstanceBody = Cast<UEnemyAnimInstance>(GetMesh()->GetAnimInstance());
+	if (AnimInstanceBody)
+	{
+		AnimInstanceBody->OnMontageEnded.AddDynamic(this, &AEnemy::OnAnimMontageEnded);
+	}
+
+	AnimInstanceHead = Cast<UEnemyAnimInstance>(Head->GetAnimInstance());
+	//if (AnimInstanceHead)
+	//{
+	//	AnimInstanceHead->OnMontageEnded.AddDynamic(this, &AEnemy::OnAnimMontageEnded);
+	//}
 	
 }
 
@@ -75,6 +90,27 @@ void AEnemy::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveC
 		{
 			Destroy();
 		}
+	}
+}
+
+void AEnemy::Attack()
+{
+	if (bIsAttacking)
+		return;
+
+	AnimInstanceBody->PlayAttackMontage();
+	AnimInstanceHead->PlayAttackMontage();
+	AnimInstanceBody->AttackMontageJumpToSection();
+	AnimInstanceHead->AttackMontageJumpToSection();
+	bIsAttacking = true;
+}
+
+void AEnemy::OnAnimMontageEnded(UAnimMontage* Montage, bool bInterrupted)
+{
+	if (bIsAttacking)
+	{
+		bIsAttacking = false;
+		OnAttackEnd.Broadcast();
 	}
 }
 
