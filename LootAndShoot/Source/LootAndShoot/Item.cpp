@@ -11,14 +11,14 @@ AItem::AItem()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	// 메쉬 설정
-	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Item Mesh"));
-	SetRootComponent(ItemMesh);
-
 	// 충돌 구체 설정
 	SphereCollision = CreateDefaultSubobject<USphereComponent>(TEXT("Sphere Collision"));
-	SphereCollision->SetupAttachment(RootComponent);
+	SetRootComponent(SphereCollision);
 	SphereCollision->InitSphereRadius(30.f);
+
+	// 메쉬 설정
+	ItemMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Item Mesh"));
+	ItemMesh->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned

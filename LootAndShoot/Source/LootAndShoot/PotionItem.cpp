@@ -2,4 +2,9 @@
 
 
 #include "PotionItem.h"
+#include "PlayerCharacter.h"
 
+void APotionItem::Interact()
+{
+	Destroy();
+}

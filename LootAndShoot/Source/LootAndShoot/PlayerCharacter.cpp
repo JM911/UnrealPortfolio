@@ -12,6 +12,8 @@
 #include "PlayerHUD.h"
 #include "Components/TextBlock.h"
 
+#include "PlayerInventoryWidget.h"
+
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
@@ -55,7 +57,19 @@ void APlayerCharacter::BeginPlay()
 
 	// 재장전
 	Reload();
-	
+
+	// 인벤토리 위젯 생성
+	if (InvenWidgetClass)
+	{
+		InvenWidget = Cast<UPlayerInventoryWidget>(CreateWidget(GetWorld(), InvenWidgetClass));
+
+		if (InvenWidget)
+		{
+			// 한 번 뷰포트에 올라와야 아이템 갱신됨. 나중에 지워도 되나 확인
+			InvenWidget->AddToViewport();
+			InvenWidget->RemoveFromParent();
+		}
+	}
 }
 
 void APlayerCharacter::MoveForward(float Value)
@@ -180,6 +194,84 @@ void APlayerCharacter::UpdatePlayerHUD()
 	}
 }
 
+void APlayerCharacter::TakeItem()
+{
+	TArray<AActor*> OverlappingActorArray;
+
+	GetOverlappingActors(OverlappingActorArray, APotionItem::StaticClass());
+
+	for (auto CurActor : OverlappingActorArray)
+	{
+		APotionItem* Potion = Cast<APotionItem>(CurActor);
+		if (Potion)
+		{
+			// 1. 아이템 스탯 추출
+			FItemStat PotionStat = Potion->GetItemStat();
+
+			// 2. 인벤토리에 이미 있는지 검색
+			TPair<FItemStat, int32>* FindResult = Inventory.Find(PotionStat.Type);
+
+			// 3-1. 있으면 수량 증가
+			if (FindResult)
+			{
+				FindResult->Value++;
+			}
+
+			// 3-2. 없으면 추가
+			else
+			{
+				TPair<FItemStat, int32> ItemInfoAndQuantity{ Potion->GetItemStat(), 1 };
+				Inventory.Add(MakeTuple(PotionStat.Type, ItemInfoAndQuantity));			
+			}
+
+			// 4. 해당 아이템에 있는 상호작용 함수 호출(여기서 파괴)
+			Potion->Interact();
+
+			// 하나만 얻고 종료
+			break;
+		}
+	}
+
+	// 위젯 정보 갱신
+	if (InvenWidget)
+	{
+		InvenWidget->InvenTextureArray.Empty();
+		InvenWidget->InvenQuantityArray.Empty();
+
+		for (auto Item : Inventory)
+		{
+			InvenWidget->InvenTextureArray.Add(Item.Value.Key.Icon);
+			InvenWidget->InvenQuantityArray.Add(Item.Value.Value);
+		}
+
+		// 업데이트 여부 전달
+		InvenWidget->bChanged = true;
+	}
+}
+
+void APlayerCharacter::InventoryWidgetToggle()
+{
+	if (InvenWidget)
+	{
+		if (bInventoryToggle)
+		{
+			InvenWidget->RemoveFromParent();
+			bInventoryToggle = false;
+
+			// 마우스 안보이게
+			GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
+		}
+		else
+		{
+			InvenWidget->AddToViewport();
+			bInventoryToggle = true;
+
+			// 마우스 보이게
+			GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
+		}
+	}
+}
+
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
@@ -210,5 +302,9 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &APlayerCharacter::FireButtonReleased);
 
 	PlayerInputComponent->BindAction("Reload", IE_Pressed, this, &APlayerCharacter::Reload);
+	
+	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &APlayerCharacter::TakeItem);
+
+	PlayerInputComponent->BindAction("Inventory", IE_Pressed, this, &APlayerCharacter::InventoryWidgetToggle);
 }
 

@@ -2,6 +2,8 @@
 
 #pragma once
 
+#include "PotionItem.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
@@ -39,6 +41,13 @@ protected:
 
 	// 탄약 관련 UI 업데이트
 	void UpdatePlayerHUD();
+
+	// 아이템 관련
+	UFUNCTION()
+	void TakeItem();
+
+	bool bInventoryToggle = false;
+	void InventoryWidgetToggle();
 
 public:	
 	// Called every frame
@@ -90,5 +99,15 @@ private:
 	FTimerHandle ReloadTimer;
 	// TODO: 투사체 종류 늘리면 배열로 설정
 
+
+	// 아이템 인벤토리 관련
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Item, meta = (AllowPrivateAccess = "true"))
+	TMap<EPotionType, TPair<FItemStat, int32>> Inventory;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Item, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UPlayerInventoryWidget> InvenWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Item, meta = (AllowPrivateAccess = "true"))
+	class UPlayerInventoryWidget* InvenWidget;
 
 };
