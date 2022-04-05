@@ -117,7 +117,7 @@ void APlayerCharacter::FireFinal()
 	if (bFireButtonPressed && bFireReady)
 	{
 		// 잔탄 체크
-		if (CurrentBullet <= 0)
+		if (CurrentMana <= 0)
 			return;
 
 		bFireReady = false;
@@ -129,16 +129,16 @@ void APlayerCharacter::FireFinal()
 			FireInterval);
 
 		// 잔탄 업데이트
-		CurrentBullet--;
+		CurrentMana--;
 
 		// 디버그용
-		//UE_LOG(LogTemp, Warning, TEXT("%d / %d , %d"), CurrentBullet, MagazineBullet, TotalBullet);
+		//UE_LOG(LogTemp, Warning, TEXT("%d / %d , %d"), CurrentMana, MagazineMana, TotalMana);
 	}
 }
 
 void APlayerCharacter::Reload()
 {
-	if (bReloading || CurrentBullet == MagazineBullet)
+	if (bReloading || CurrentMana == MagazineMana)
 		return;
 
 	bReloading = true;
@@ -155,9 +155,9 @@ void APlayerCharacter::ReloadEnd()
 	bReloading = false;
 
 	// 실제 장전
-	int32 BulletDiff = MagazineBullet - CurrentBullet;
-	CurrentBullet = MagazineBullet;
-	TotalBullet -= BulletDiff;
+	int32 BulletDiff = MagazineMana - CurrentMana;
+	CurrentMana = MagazineMana;
+	TotalMana -= BulletDiff;
 
 	// 디버그용
 	//UE_LOG(LogTemp, Warning, TEXT("Realod Complete!"));
@@ -173,7 +173,7 @@ void APlayerCharacter::UpdatePlayerHUD()
 		if (CurHUD)
 		{
 			const FString AmmoStr = FString::Printf(TEXT("Ammo %02d/%02d\nTotal %03d"),
-				CurrentBullet, MagazineBullet, TotalBullet);
+				CurrentMana, MagazineMana, TotalMana);
 
 			CurHUD->GetAmmoText()->SetText(FText::FromString(AmmoStr));
 		}

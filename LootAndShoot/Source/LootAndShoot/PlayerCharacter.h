@@ -81,9 +81,9 @@ private:
 
 
 	// 장전 관련 변수
-	int32 CurrentBullet = 0;
-	int32 MagazineBullet = 10;
-	int32 TotalBullet = 500;
+	int32 CurrentMana = 0;
+	int32 MagazineMana = 10;
+	int32 TotalMana = 500;
 
 	bool bReloading = false;
 	float ReloadTime = 0.5f;
