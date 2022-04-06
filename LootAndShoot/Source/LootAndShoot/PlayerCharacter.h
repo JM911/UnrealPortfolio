@@ -24,7 +24,8 @@ protected:
 	// 움직임
 	void MoveForward(float Value);
 	void MoveRight(float Value);
-	// 일단 Turn, Lookup은 기본함수 사용 => 나중에 감도 필요하면 추가
+	void Turn(float Value);
+	void LookUp(float Value);
 	
 	/** 공격 관련 */
 	void FireProjectile();
@@ -48,6 +49,9 @@ protected:
 
 	bool bInventoryToggle = false;
 	void InventoryWidgetToggle();
+
+	// 스탯 업데이트
+	void StatUpdate();
 
 public:	
 	// Called every frame
@@ -86,18 +90,13 @@ private:
 	FTimerHandle FireTimer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat, meta = (AllowPrivateAccess = "true"))
-	float FireInterval = 0.2f;
+
 
 
 	// 장전 관련 변수
-	int32 CurrentMana = 0;
-	int32 MagazineMana = 10;
-	int32 TotalMana = 500;
-
 	bool bReloading = false;
 	float ReloadTime = 0.5f;
 	FTimerHandle ReloadTimer;
-	// TODO: 투사체 종류 늘리면 배열로 설정
 
 
 	// 아이템 인벤토리 관련
@@ -109,5 +108,22 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Item, meta = (AllowPrivateAccess = "true"))
 	class UPlayerInventoryWidget* InvenWidget;
+
+
+	// 스탯 
+	class UPlayerStatComponent* StatComponent;
+
+	float CurrentHp = 0.f;
+	float MaxHp = 0.f;
+
+	int32 CurrentMana = 0;
+	int32 MagazineMana = 10;
+	int32 CurrentTotalMana = 0;
+	int32 TotalMana = 500;
+
+	float Attack = 0.f;
+	float FireInterval = 0.2f;
+	float MoveSpeed = 0.f;
+	
 
 };

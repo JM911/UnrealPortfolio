@@ -14,6 +14,8 @@
 
 #include "PlayerInventoryWidget.h"
 
+#include "PlayerStatComponent.h"
+
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
@@ -43,6 +45,8 @@ APlayerCharacter::APlayerCharacter()
 	MuzzleLocation = CreateDefaultSubobject<USceneComponent>(TEXT("Muzzle Location"));
 	MuzzleLocation->SetupAttachment(GunMesh);
 
+	// 스탯 생성
+	StatComponent = CreateDefaultSubobject<UPlayerStatComponent>(TEXT("Stat Component"));
 }
 
 // Called when the game starts or when spawned
@@ -55,6 +59,10 @@ void APlayerCharacter::BeginPlay()
 		FAttachmentTransformRules::SnapToTargetNotIncludingScale,
 		TEXT("GripPoint"));
 
+	// 스탯 초기화
+	StatUpdate();
+	//CurrentHp = MaxHp;
+
 	// 재장전
 	Reload();
 
@@ -62,13 +70,6 @@ void APlayerCharacter::BeginPlay()
 	if (InvenWidgetClass)
 	{
 		InvenWidget = Cast<UPlayerInventoryWidget>(CreateWidget(GetWorld(), InvenWidgetClass));
-
-		if (InvenWidget)
-		{
-			// 한 번 뷰포트에 올라와야 아이템 갱신됨. 나중에 지워도 되나 확인
-			InvenWidget->AddToViewport();
-			InvenWidget->RemoveFromParent();
-		}
 	}
 }
 
@@ -88,9 +89,27 @@ void APlayerCharacter::MoveRight(float Value)
 	}
 }
 
+void APlayerCharacter::Turn(float Value)
+{
+	if (bInventoryToggle)
+		return;
+
+	AddControllerYawInput(Value);
+}
+
+void APlayerCharacter::LookUp(float Value)
+{
+	if (bInventoryToggle)
+		return;
+
+	AddControllerPitchInput(Value);
+}
+
 void APlayerCharacter::FireProjectile()
 {
 	// TODO: 나중에 조준점으로 발사하도록 변경?
+	if (bInventoryToggle)
+		return;
 
 	UWorld* World = GetWorld();
 	if (World && MuzzleLocation)
@@ -235,13 +254,16 @@ void APlayerCharacter::TakeItem()
 	// 위젯 정보 갱신
 	if (InvenWidget)
 	{
-		InvenWidget->InvenTextureArray.Empty();
+		//InvenWidget->InvenTextureArray.Empty();
 		InvenWidget->InvenQuantityArray.Empty();
+		InvenWidget->InvenItemStatArray.Empty();
 
 		for (auto Item : Inventory)
 		{
-			InvenWidget->InvenTextureArray.Add(Item.Value.Key.Icon);
+			// TODO: 그냥 아이템 스탯 모두 넘기는 걸로 변경
+			//InvenWidget->InvenTextureArray.Add(Item.Value.Key.Icon);
 			InvenWidget->InvenQuantityArray.Add(Item.Value.Value);
+			InvenWidget->InvenItemStatArray.Add(Item.Value.Key);
 		}
 
 		// 업데이트 여부 전달
@@ -272,6 +294,21 @@ void APlayerCharacter::InventoryWidgetToggle()
 	}
 }
 
+void APlayerCharacter::StatUpdate()
+{
+	// 게임 시작, 레벨 업 포인트 소모 시 호출
+	if (StatComponent)
+	{
+		MaxHp = StatComponent->GetCurrentStat(EPlayerStatType::MAX_HP);
+		MagazineMana = StatComponent->GetCurrentStat(EPlayerStatType::MANA_MAGAZINE);
+		TotalMana = StatComponent->GetCurrentStat(EPlayerStatType::MANA_TOTAL);
+
+		Attack = StatComponent->GetCurrentStat(EPlayerStatType::ATTACK);
+		FireInterval = StatComponent->GetCurrentStat(EPlayerStatType::FIRE_INTERVAL);
+		MoveSpeed = StatComponent->GetCurrentStat(EPlayerStatType::MOVE_SPEED);
+	}
+}
+
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
@@ -292,8 +329,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAxis("MoveForward", this, &APlayerCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &APlayerCharacter::MoveRight);
 
-	PlayerInputComponent->BindAxis("Turn", this, &ACharacter::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("LookUp", this, &ACharacter::AddControllerPitchInput);
+	PlayerInputComponent->BindAxis("Turn", this, &APlayerCharacter::Turn);
+	PlayerInputComponent->BindAxis("LookUp", this, &APlayerCharacter::LookUp);
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);

@@ -2,6 +2,7 @@
 
 #pragma once
 
+#include "PotionItem.h"
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "PlayerInventoryWidget.generated.h"
@@ -24,5 +25,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory, meta = (AllowPrivateAccess = "true"))
 	TArray<int32> InvenQuantityArray;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory, meta = (AllowPrivateAccess = "true"))
+	TArray<FItemStat> InvenItemStatArray;
+
 	
 };
