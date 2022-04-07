@@ -52,8 +52,8 @@ void UPlayerStatComponent::InitStat()
 	StatLevelUpRate.Add(MakeTuple(EPlayerStatType::MANA_MAGAZINE, 0.2f));
 	StatLevelUpRate.Add(MakeTuple(EPlayerStatType::MANA_TOTAL, 1.f));
 	StatLevelUpRate.Add(MakeTuple(EPlayerStatType::ATTACK, 0.5f));
-	StatLevelUpRate.Add(MakeTuple(EPlayerStatType::FIRE_INTERVAL, -0.1f));
-	StatLevelUpRate.Add(MakeTuple(EPlayerStatType::MOVE_SPEED, 0.1f));
+	StatLevelUpRate.Add(MakeTuple(EPlayerStatType::FIRE_INTERVAL, -0.15f));
+	StatLevelUpRate.Add(MakeTuple(EPlayerStatType::MOVE_SPEED, 0.3f));
 
 	// 스탯 레벨 상황 저장
 	StatLevelMap.Add(MakeTuple(EPlayerStatType::MAX_HP, 1));
@@ -87,6 +87,10 @@ void UPlayerStatComponent::LevelUpStat(EPlayerStatType Type)
 	// 레벨 업
 	CurrentStat[Type] += StatBase[Type] * StatLevelUpRate[Type];
 
+	// 공격 간격 최소치 체크 (다른 스탯도 체크해야 하면 그냥 리팩토링)
+	if (CurrentStat[EPlayerStatType::FIRE_INTERVAL] < 0.1f)
+		CurrentStat[EPlayerStatType::FIRE_INTERVAL] = 0.1f;
+
 	// 스탯 레벨 증가
 	StatLevelMap[Type]++;
 
@@ -100,4 +104,12 @@ float UPlayerStatComponent::GetCurrentStat(EPlayerStatType Type)
 		return CurrentStat[Type];
 
 	return 0.f;
+}
+
+int8 UPlayerStatComponent::GetStatLevel(EPlayerStatType Type)
+{
+	if (StatLevelMap.Find(Type))
+		return StatLevelMap[Type];
+
+	return 0;
 }

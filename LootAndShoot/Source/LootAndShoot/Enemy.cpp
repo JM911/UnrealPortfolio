@@ -86,7 +86,7 @@ void AEnemy::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveC
 		// 리팩토링 고려...
 		CurrentHp -= Projectile->GetDamageValue();
 		
-		if (UKismetMathLibrary::NearlyEqual_FloatFloat(CurrentHp, 0.f))
+		if (CurrentHp <= 0.f) //UKismetMathLibrary::NearlyEqual_FloatFloat(CurrentHp, 0.f))
 		{
 			Destroy();
 		}

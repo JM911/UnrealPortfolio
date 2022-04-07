@@ -14,7 +14,7 @@
 
 #include "PlayerInventoryWidget.h"
 
-#include "PlayerStatComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 APlayerCharacter::APlayerCharacter()
@@ -60,7 +60,7 @@ void APlayerCharacter::BeginPlay()
 		TEXT("GripPoint"));
 
 	// 스탯 초기화
-	StatUpdate();
+	AllStatUpdate();
 	//CurrentHp = MaxHp;
 
 	// 재장전
@@ -71,6 +71,10 @@ void APlayerCharacter::BeginPlay()
 	{
 		InvenWidget = Cast<UPlayerInventoryWidget>(CreateWidget(GetWorld(), InvenWidgetClass));
 	}
+
+	// 테스트용 레벨 업 포인트 지급
+	StatComponent->PlayerLevelUp(30);
+	UE_LOG(LogTemp, Warning, TEXT("Current Stat Point: %d"), StatComponent->GetLevelUpPoint());
 }
 
 void APlayerCharacter::MoveForward(float Value)
@@ -120,8 +124,14 @@ void APlayerCharacter::FireProjectile()
 		FActorSpawnParameters ActorSpawnParams;
 		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
 
-		World->SpawnActor<AProjectile>(ProjectileClass,
+		AProjectile* SpawnedProjectile = World->SpawnActor<AProjectile>(ProjectileClass,
 			SpawnLocation, SpawnRotation, ActorSpawnParams);
+
+		// 공격력 세팅
+		if (SpawnedProjectile)
+		{
+			SpawnedProjectile->SetDamageValue(Attack);
+		}
 
 		// TODO: 사운드, 애니메이션 설정
 	}
@@ -294,19 +304,93 @@ void APlayerCharacter::InventoryWidgetToggle()
 	}
 }
 
-void APlayerCharacter::StatUpdate()
+void APlayerCharacter::StatUpdate(EPlayerStatType Type)
 {
-	// 게임 시작, 레벨 업 포인트 소모 시 호출
 	if (StatComponent)
 	{
-		MaxHp = StatComponent->GetCurrentStat(EPlayerStatType::MAX_HP);
-		MagazineMana = StatComponent->GetCurrentStat(EPlayerStatType::MANA_MAGAZINE);
-		TotalMana = StatComponent->GetCurrentStat(EPlayerStatType::MANA_TOTAL);
+		switch (Type)
+		{
+		case EPlayerStatType::MAX_HP:
+			MaxHp = StatComponent->GetCurrentStat(EPlayerStatType::MAX_HP);
+			break;
+		case EPlayerStatType::MANA_MAGAZINE:
+			MagazineMana = StatComponent->GetCurrentStat(EPlayerStatType::MANA_MAGAZINE);
+			break;
+		case EPlayerStatType::MANA_TOTAL:
+			TotalMana = StatComponent->GetCurrentStat(EPlayerStatType::MANA_TOTAL);
+			break;
+		case EPlayerStatType::ATTACK:
+			Attack = StatComponent->GetCurrentStat(EPlayerStatType::ATTACK);
+			break;
+		case EPlayerStatType::FIRE_INTERVAL:
+			FireInterval = StatComponent->GetCurrentStat(EPlayerStatType::FIRE_INTERVAL);
+			break;
+		case EPlayerStatType::MOVE_SPEED:
+			MoveSpeedRate = StatComponent->GetCurrentStat(EPlayerStatType::MOVE_SPEED);
+			GetCharacterMovement()->MaxWalkSpeed = BaseSpeed * MoveSpeedRate;
+			break;
+		default:
+			break;
+		}
 
-		Attack = StatComponent->GetCurrentStat(EPlayerStatType::ATTACK);
-		FireInterval = StatComponent->GetCurrentStat(EPlayerStatType::FIRE_INTERVAL);
-		MoveSpeed = StatComponent->GetCurrentStat(EPlayerStatType::MOVE_SPEED);
+		UE_LOG(LogTemp, Warning, TEXT("%d / %d, %d, %d, %d, %d, %d"),
+			StatComponent->GetLevelUpPoint(),
+			StatComponent->GetStatLevel(EPlayerStatType::MAX_HP),
+			StatComponent->GetStatLevel(EPlayerStatType::MANA_MAGAZINE),
+			StatComponent->GetStatLevel(EPlayerStatType::MANA_TOTAL),
+			StatComponent->GetStatLevel(EPlayerStatType::ATTACK),
+			StatComponent->GetStatLevel(EPlayerStatType::FIRE_INTERVAL),
+			StatComponent->GetStatLevel(EPlayerStatType::MOVE_SPEED));
 	}
+}
+
+void APlayerCharacter::AllStatUpdate()
+{
+	if (StatComponent)
+	{
+		StatUpdate(EPlayerStatType::MAX_HP);
+		StatUpdate(EPlayerStatType::MANA_MAGAZINE);
+		StatUpdate(EPlayerStatType::MANA_TOTAL);
+		StatUpdate(EPlayerStatType::ATTACK);
+		StatUpdate(EPlayerStatType::FIRE_INTERVAL);
+		StatUpdate(EPlayerStatType::MOVE_SPEED);
+	}
+}
+
+void APlayerCharacter::LevelUpMaxHp()
+{
+	StatComponent->LevelUpStat(EPlayerStatType::MAX_HP);
+	StatUpdate(EPlayerStatType::MAX_HP);
+}
+
+void APlayerCharacter::LevelUpManaMagazine()
+{
+	StatComponent->LevelUpStat(EPlayerStatType::MANA_MAGAZINE);
+	StatUpdate(EPlayerStatType::MANA_MAGAZINE);
+}
+
+void APlayerCharacter::LevelUpManaToTal()
+{
+	StatComponent->LevelUpStat(EPlayerStatType::MANA_TOTAL);
+	StatUpdate(EPlayerStatType::MANA_TOTAL);
+}
+
+void APlayerCharacter::LevelUpAttack()
+{
+	StatComponent->LevelUpStat(EPlayerStatType::ATTACK);
+	StatUpdate(EPlayerStatType::ATTACK);
+}
+
+void APlayerCharacter::LevelUpFireInterval()
+{
+	StatComponent->LevelUpStat(EPlayerStatType::FIRE_INTERVAL);
+	StatUpdate(EPlayerStatType::FIRE_INTERVAL);
+}
+
+void APlayerCharacter::LevelUpMoveSpeed()
+{
+	StatComponent->LevelUpStat(EPlayerStatType::MOVE_SPEED);
+	StatUpdate(EPlayerStatType::MOVE_SPEED);
 }
 
 // Called every frame
@@ -343,5 +427,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &APlayerCharacter::TakeItem);
 
 	PlayerInputComponent->BindAction("Inventory", IE_Pressed, this, &APlayerCharacter::InventoryWidgetToggle);
+
+	PlayerInputComponent->BindAction("Test_1", IE_Pressed, this, &APlayerCharacter::LevelUpMaxHp);
+	PlayerInputComponent->BindAction("Test_2", IE_Pressed, this, &APlayerCharacter::LevelUpManaMagazine);
+	PlayerInputComponent->BindAction("Test_3", IE_Pressed, this, &APlayerCharacter::LevelUpManaToTal);
+	PlayerInputComponent->BindAction("Test_4", IE_Pressed, this, &APlayerCharacter::LevelUpAttack);
+	PlayerInputComponent->BindAction("Test_5", IE_Pressed, this, &APlayerCharacter::LevelUpFireInterval);
+	PlayerInputComponent->BindAction("Test_6", IE_Pressed, this, &APlayerCharacter::LevelUpMoveSpeed);
 }
 

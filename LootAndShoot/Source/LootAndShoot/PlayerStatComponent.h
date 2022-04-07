@@ -56,15 +56,17 @@ private:
 
 	// 기타 레벨 업 관련
 	int8 LevelUpPoint = 0;
-	int8 MaxLevel = 5;
+	int8 MaxLevel = 6;
 	TMap<EPlayerStatType, int8> StatLevelMap;
 
 public:
 	void LevelUpStat(EPlayerStatType Type);
 
 	float GetCurrentStat(EPlayerStatType Type);
+	int8 GetStatLevel(EPlayerStatType Type);
+
 	FORCEINLINE int8 GetLevelUpPoint() const { return LevelUpPoint; }
 
 	// 레벨 업
-	void PlayerLevelUp() { LevelUpPoint++; }
+	void PlayerLevelUp(int8 Point) { LevelUpPoint += Point; }
 };

@@ -46,4 +46,5 @@ private:
 
 public:
 	FORCEINLINE float GetDamageValue() const { return DamageValue; }
+	void SetDamageValue(float Attack) { DamageValue = Attack; }
 };

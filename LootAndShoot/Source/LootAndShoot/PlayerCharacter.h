@@ -4,6 +4,8 @@
 
 #include "PotionItem.h"
 
+#include "PlayerStatComponent.h"
+
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "PlayerCharacter.generated.h"
@@ -50,8 +52,16 @@ protected:
 	bool bInventoryToggle = false;
 	void InventoryWidgetToggle();
 
-	// 스탯 업데이트
-	void StatUpdate();
+	// 스탯 관련 => 레벨업 부분 리팩토링 가능?
+	void StatUpdate(EPlayerStatType Type);
+	void AllStatUpdate();
+	
+	void LevelUpMaxHp();
+	void LevelUpManaMagazine();
+	void LevelUpManaToTal();
+	void LevelUpAttack();
+	void LevelUpFireInterval();
+	void LevelUpMoveSpeed();
 
 public:	
 	// Called every frame
@@ -123,7 +133,9 @@ private:
 
 	float Attack = 0.f;
 	float FireInterval = 0.2f;
-	float MoveSpeed = 0.f;
+
+	float BaseSpeed = 600.f;
+	float MoveSpeedRate = 0.f;
 	
 
 };
