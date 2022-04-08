@@ -129,7 +129,7 @@ private:
 	int32 CurrentMana = 0;
 	int32 MagazineMana = 10;
 	int32 CurrentTotalMana = 0;
-	int32 TotalMana = 500;
+	int32 MaxTotalMana = 500;
 
 	float Attack = 0.f;
 	float FireInterval = 0.2f;
@@ -137,5 +137,19 @@ private:
 	float BaseSpeed = 600.f;
 	float MoveSpeedRate = 0.f;
 	
+	float CurrentExp = 0.f;
+	float NextLevelExp = 100.f;
+
+
+public:
+	/** 즉시 습득 아이템 관련 함수들 */
+	// 체력 회복
+	void AddHp(float Amount);
+
+	// 마나 회복
+	void AddMana(float Amount);
+
+	// 경험치 증가 및 레벨 업 체크
+	void AddExp(float Amount);
 
 };

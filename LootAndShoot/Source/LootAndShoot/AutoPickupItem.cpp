@@ -54,9 +54,27 @@ void AAutoPickupItem::PickUpEnd()
 		FVector PlayerLocation = PlayerPawn->GetActorLocation();
 		if ((GetActorLocation() - PlayerLocation).Size() <= PickUpDistance)
 		{
-			// TODO: 여기서 플레이어에 정보 전달 후 파괴
+			PickUpCallback();
 			Destroy();
 		}
+	}
+}
+
+void AAutoPickupItem::PickUpCallback()
+{
+	switch (APItemType)
+	{
+	case EAPItemType::HP:
+		PlayerPawn->AddHp(Amount);
+		break;
+	case EAPItemType::MANA:
+		PlayerPawn->AddMana(Amount);
+		break;
+	case EAPItemType::EXP:
+		PlayerPawn->AddExp(Amount);
+		break;
+	default:
+		break;
 	}
 }
 

@@ -200,7 +200,7 @@ void APlayerCharacter::ReloadEnd()
 	// 실제 장전
 	int32 BulletDiff = MagazineMana - CurrentMana;
 	CurrentMana = MagazineMana;
-	TotalMana -= BulletDiff;
+	CurrentTotalMana -= BulletDiff;
 
 	// 디버그용
 	//UE_LOG(LogTemp, Warning, TEXT("Realod Complete!"));
@@ -216,7 +216,7 @@ void APlayerCharacter::UpdatePlayerHUD()
 		if (CurHUD)
 		{
 			const FString AmmoStr = FString::Printf(TEXT("Ammo %02d/%02d\nTotal %03d"),
-				CurrentMana, MagazineMana, TotalMana);
+				CurrentMana, MagazineMana, CurrentTotalMana);
 
 			CurHUD->GetAmmoText()->SetText(FText::FromString(AmmoStr));
 		}
@@ -312,12 +312,14 @@ void APlayerCharacter::StatUpdate(EPlayerStatType Type)
 		{
 		case EPlayerStatType::MAX_HP:
 			MaxHp = StatComponent->GetCurrentStat(EPlayerStatType::MAX_HP);
+			CurrentHp = MaxHp;
 			break;
 		case EPlayerStatType::MANA_MAGAZINE:
 			MagazineMana = StatComponent->GetCurrentStat(EPlayerStatType::MANA_MAGAZINE);
 			break;
 		case EPlayerStatType::MANA_TOTAL:
-			TotalMana = StatComponent->GetCurrentStat(EPlayerStatType::MANA_TOTAL);
+			MaxTotalMana = StatComponent->GetCurrentStat(EPlayerStatType::MANA_TOTAL);
+			CurrentTotalMana = MaxTotalMana;
 			break;
 		case EPlayerStatType::ATTACK:
 			Attack = StatComponent->GetCurrentStat(EPlayerStatType::ATTACK);
@@ -434,5 +436,36 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Test_4", IE_Pressed, this, &APlayerCharacter::LevelUpAttack);
 	PlayerInputComponent->BindAction("Test_5", IE_Pressed, this, &APlayerCharacter::LevelUpFireInterval);
 	PlayerInputComponent->BindAction("Test_6", IE_Pressed, this, &APlayerCharacter::LevelUpMoveSpeed);
+}
+
+void APlayerCharacter::AddHp(float Amount)
+{
+	CurrentHp += Amount;
+	if (CurrentHp > MaxHp)
+	{
+		CurrentHp = MaxHp;
+	}
+}
+
+void APlayerCharacter::AddMana(float Amount)
+{
+	CurrentTotalMana += Amount;
+	if (CurrentTotalMana > MaxTotalMana)
+	{
+		CurrentTotalMana = MaxTotalMana;
+	}
+}
+
+void APlayerCharacter::AddExp(float Amount)
+{
+	CurrentExp += Amount;
+	if (CurrentExp > NextLevelExp)
+	{
+		int8 LevelUpPoint = CurrentExp / NextLevelExp;
+		float LeftExp = CurrentExp - (LevelUpPoint * NextLevelExp);
+		
+		StatComponent->PlayerLevelUp(LevelUpPoint);
+		CurrentExp = LeftExp;
+	}
 }
 

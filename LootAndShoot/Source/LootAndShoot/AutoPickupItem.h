@@ -9,6 +9,16 @@
 /**
  * 
  */
+UENUM(BlueprintType)
+enum class EAPItemType : uint8
+{
+	HP		UMETA(DisplayName = "Hp"),
+	MANA	UMETA(DisplayName = "Mana"),
+	EXP		UMETA(DisplayName = "Exp"),
+
+	END		UMETA(DisplayName = "End")
+};
+
 UCLASS()
 class LOOTANDSHOOT_API AAutoPickupItem : public AItem
 {
@@ -31,6 +41,9 @@ protected:
 	// 습득 판정
 	void PickUpEnd();
 
+	// 습득 시 호출 함수
+	void PickUpCallback();
+
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -47,5 +60,13 @@ private:
 
 	// 습득 판정 거리
 	float PickUpDistance = 30.f;
+
+	// 타입 (블프 수정)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Stat, meta = (AllowPrivateAccess = "true"))
+	EAPItemType APItemType;
+
+	// 체력 or 마나 or 경험치 회복량 (3가지 겸용) + 블프 수정
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Stat, meta = (AllowPrivateAccess = "true"))
+	float Amount = 0.f;
 	
 };
