@@ -32,4 +32,7 @@ private:
 	// 충돌 구체(아이템 상호작용 범위 체크용) => 세부 조정은 블프에서
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Collision, meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* SphereCollision;
+
+public:
+	USphereComponent* GetSphereCollision() const { return SphereCollision; }
 };
