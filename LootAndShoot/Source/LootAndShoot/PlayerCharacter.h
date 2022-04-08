@@ -63,6 +63,9 @@ protected:
 	void LevelUpFireInterval();
 	void LevelUpMoveSpeed();
 
+	bool bStatWidgetToggle = false;
+	void StatWidgetToggle();
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -141,6 +144,14 @@ private:
 	float NextLevelExp = 100.f;
 
 
+	// 스탯 위젯
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Item, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UPlayerStatWidget> StatWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Item, meta = (AllowPrivateAccess = "true"))
+	class UPlayerStatWidget* StatWidget;
+
+
 public:
 	/** 즉시 습득 아이템 관련 함수들 */
 	// 체력 회복
@@ -151,5 +162,8 @@ public:
 
 	// 경험치 증가 및 레벨 업 체크
 	void AddExp(float Amount);
+
+	// 스탯 관련
+	UPlayerStatComponent* GetStatComponent() const { return StatComponent; }
 
 };

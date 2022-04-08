@@ -64,6 +64,7 @@ public:
 
 	float GetCurrentStat(EPlayerStatType Type);
 	int8 GetStatLevel(EPlayerStatType Type);
+	int8 GetMaxLevel() { return MaxLevel; }
 
 	FORCEINLINE int8 GetLevelUpPoint() const { return LevelUpPoint; }
 

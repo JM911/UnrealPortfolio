@@ -13,6 +13,7 @@
 #include "Components/TextBlock.h"
 
 #include "PlayerInventoryWidget.h"
+#include "PlayerStatWidget.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
 
@@ -72,9 +73,26 @@ void APlayerCharacter::BeginPlay()
 		InvenWidget = Cast<UPlayerInventoryWidget>(CreateWidget(GetWorld(), InvenWidgetClass));
 	}
 
+	// 스탯 위젯 생성
+	if (StatWidgetClass)
+	{
+		StatWidget = Cast<UPlayerStatWidget>(CreateWidget(GetWorld(), StatWidgetClass));
+	}
+
 	// 테스트용 레벨 업 포인트 지급
 	StatComponent->PlayerLevelUp(30);
 	UE_LOG(LogTemp, Warning, TEXT("Current Stat Point: %d"), StatComponent->GetLevelUpPoint());
+
+	// 스탯 위젯 초기화
+	if (StatWidget)
+	{
+		// 최대 레벨 전달
+		StatWidget->SetMaxLevel(StatComponent->GetMaxLevel());
+
+		// Hp 초기화
+		StatWidget->SetHpChanged(StatComponent->GetStatLevel(EPlayerStatType::MAX_HP));
+	}
+
 }
 
 void APlayerCharacter::MoveForward(float Value)
@@ -95,7 +113,7 @@ void APlayerCharacter::MoveRight(float Value)
 
 void APlayerCharacter::Turn(float Value)
 {
-	if (bInventoryToggle)
+	if (bInventoryToggle || bStatWidgetToggle)
 		return;
 
 	AddControllerYawInput(Value);
@@ -103,7 +121,7 @@ void APlayerCharacter::Turn(float Value)
 
 void APlayerCharacter::LookUp(float Value)
 {
-	if (bInventoryToggle)
+	if (bInventoryToggle || bStatWidgetToggle)
 		return;
 
 	AddControllerPitchInput(Value);
@@ -112,7 +130,7 @@ void APlayerCharacter::LookUp(float Value)
 void APlayerCharacter::FireProjectile()
 {
 	// TODO: 나중에 조준점으로 발사하도록 변경?
-	if (bInventoryToggle)
+	if (bInventoryToggle || bStatWidgetToggle)
 		return;
 
 	UWorld* World = GetWorld();
@@ -283,6 +301,10 @@ void APlayerCharacter::TakeItem()
 
 void APlayerCharacter::InventoryWidgetToggle()
 {
+	// 만약 스탯 창이 떠있으면 스킵
+	if (bStatWidgetToggle)
+		return;
+
 	if (InvenWidget)
 	{
 		if (bInventoryToggle)
@@ -363,6 +385,13 @@ void APlayerCharacter::LevelUpMaxHp()
 {
 	StatComponent->LevelUpStat(EPlayerStatType::MAX_HP);
 	StatUpdate(EPlayerStatType::MAX_HP);
+
+	// 스탯 위젯 업데이트
+	if (StatWidget)
+	{
+		StatWidget->SetHpChanged(StatComponent->GetStatLevel(EPlayerStatType::MAX_HP));
+	}
+
 }
 
 void APlayerCharacter::LevelUpManaMagazine()
@@ -393,6 +422,33 @@ void APlayerCharacter::LevelUpMoveSpeed()
 {
 	StatComponent->LevelUpStat(EPlayerStatType::MOVE_SPEED);
 	StatUpdate(EPlayerStatType::MOVE_SPEED);
+}
+
+void APlayerCharacter::StatWidgetToggle()
+{
+	// 만약 인벤토리 창이 떠있으면 스킵
+	if (bInventoryToggle)
+		return;
+
+	if (StatWidget)
+	{
+		if (bStatWidgetToggle)
+		{
+			StatWidget->RemoveFromParent();
+			bStatWidgetToggle = false;
+
+			// 마우스 안보이게
+			GetWorld()->GetFirstPlayerController()->bShowMouseCursor = false;
+		}
+		else
+		{
+			StatWidget->AddToViewport();
+			bStatWidgetToggle = true;
+
+			// 마우스 보이게
+			GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
+		}
+	}
 }
 
 // Called every frame
@@ -429,6 +485,8 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 	PlayerInputComponent->BindAction("Interact", IE_Pressed, this, &APlayerCharacter::TakeItem);
 
 	PlayerInputComponent->BindAction("Inventory", IE_Pressed, this, &APlayerCharacter::InventoryWidgetToggle);
+
+	PlayerInputComponent->BindAction("Stat", IE_Pressed, this, &APlayerCharacter::StatWidgetToggle);
 
 	PlayerInputComponent->BindAction("Test_1", IE_Pressed, this, &APlayerCharacter::LevelUpMaxHp);
 	PlayerInputComponent->BindAction("Test_2", IE_Pressed, this, &APlayerCharacter::LevelUpManaMagazine);
