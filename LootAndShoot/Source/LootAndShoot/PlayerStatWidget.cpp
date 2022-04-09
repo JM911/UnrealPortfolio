@@ -3,9 +3,8 @@
 
 #include "PlayerStatWidget.h"
 
-#include "PlayerCharacter.h"
-#include "Kismet/GameplayStatics.h"
-#include "PlayerStatComponent.h"
+//#include "PlayerCharacter.h"
+//#include "Kismet/GameplayStatics.h"
 
 //bool UPlayerStatWidget::Initialize()
 //{
@@ -24,23 +23,57 @@
 //
 //}
 
-void UPlayerStatWidget::SetHpChanged(int8 Level)
+void UPlayerStatWidget::MyInit(int8 Level)
+{
+	// 최대 레벨 초기화
+	SetMaxLevel(Level);
+}
+
+void UPlayerStatWidget::SetStatChanged(EPlayerStatType Type, int8 Level)
+{
+	switch (Type)
+	{
+	case EPlayerStatType::MAX_HP:
+		ApplyStatChanged(HpArray, Level);
+		break;
+	case EPlayerStatType::MANA_MAGAZINE:
+		ApplyStatChanged(ManaMagazineArray, Level);
+		break;
+	case EPlayerStatType::MANA_TOTAL:
+		ApplyStatChanged(TotalManaArray, Level);
+		break;
+	case EPlayerStatType::ATTACK:
+		ApplyStatChanged(AttackArray, Level);
+		break;
+	case EPlayerStatType::FIRE_INTERVAL:
+		ApplyStatChanged(FireSpeedArray, Level);
+		break;
+	case EPlayerStatType::MOVE_SPEED:
+		ApplyStatChanged(MoveSpeedArray, Level);
+		break;
+	default:
+		break;
+	}
+
+	bChanged = true;
+	ChangedType = Type;
+}
+
+void UPlayerStatWidget::ApplyStatChanged(TArray<bool>& TargetArray, int8 Level)
 {
 	// 초기화
-	HpArray.Empty();
+	TargetArray.Empty();
 
 	// 업데이트
 	for (int i = 1; i <= MaxLevel; i++)
 	{
 		if (i <= Level)
 		{
-			HpArray.Add(true);
+			TargetArray.Add(true);
 		}
 		else
 		{
-			HpArray.Add(false);
+			TargetArray.Add(false);
 		}
 	}
-
-	bChanged = true;
 }

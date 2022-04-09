@@ -86,11 +86,21 @@ void APlayerCharacter::BeginPlay()
 	// 스탯 위젯 초기화
 	if (StatWidget)
 	{
-		// 최대 레벨 전달
-		StatWidget->SetMaxLevel(StatComponent->GetMaxLevel());
+		// 초기화
 
-		// Hp 초기화
-		StatWidget->SetHpChanged(StatComponent->GetStatLevel(EPlayerStatType::MAX_HP));
+		// 최대 레벨 전달
+		StatWidget->MyInit(StatComponent->GetMaxLevel());
+
+		// 스탯 초기화 => enum 순회 방법 없을까?
+		StatWidgetUpdate(EPlayerStatType::MAX_HP);
+		StatWidgetUpdate(EPlayerStatType::MANA_MAGAZINE);
+		StatWidgetUpdate(EPlayerStatType::MANA_TOTAL);
+		StatWidgetUpdate(EPlayerStatType::ATTACK);
+		StatWidgetUpdate(EPlayerStatType::FIRE_INTERVAL);
+		StatWidgetUpdate(EPlayerStatType::MOVE_SPEED);
+
+		// 레벨 업 포인트 초기화
+		StatWidgetLevelUpPointUpdate();
 	}
 
 }
@@ -383,45 +393,61 @@ void APlayerCharacter::AllStatUpdate()
 
 void APlayerCharacter::LevelUpMaxHp()
 {
-	StatComponent->LevelUpStat(EPlayerStatType::MAX_HP);
-	StatUpdate(EPlayerStatType::MAX_HP);
-
-	// 스탯 위젯 업데이트
-	if (StatWidget)
-	{
-		StatWidget->SetHpChanged(StatComponent->GetStatLevel(EPlayerStatType::MAX_HP));
-	}
-
+	LevelUpStat(EPlayerStatType::MAX_HP);
 }
 
 void APlayerCharacter::LevelUpManaMagazine()
 {
-	StatComponent->LevelUpStat(EPlayerStatType::MANA_MAGAZINE);
-	StatUpdate(EPlayerStatType::MANA_MAGAZINE);
+	LevelUpStat(EPlayerStatType::MANA_MAGAZINE);
 }
 
 void APlayerCharacter::LevelUpManaToTal()
 {
-	StatComponent->LevelUpStat(EPlayerStatType::MANA_TOTAL);
-	StatUpdate(EPlayerStatType::MANA_TOTAL);
+	LevelUpStat(EPlayerStatType::MANA_TOTAL);
 }
 
 void APlayerCharacter::LevelUpAttack()
 {
-	StatComponent->LevelUpStat(EPlayerStatType::ATTACK);
-	StatUpdate(EPlayerStatType::ATTACK);
+	LevelUpStat(EPlayerStatType::ATTACK);
 }
 
 void APlayerCharacter::LevelUpFireInterval()
 {
-	StatComponent->LevelUpStat(EPlayerStatType::FIRE_INTERVAL);
-	StatUpdate(EPlayerStatType::FIRE_INTERVAL);
+	LevelUpStat(EPlayerStatType::FIRE_INTERVAL);
 }
 
 void APlayerCharacter::LevelUpMoveSpeed()
 {
-	StatComponent->LevelUpStat(EPlayerStatType::MOVE_SPEED);
-	StatUpdate(EPlayerStatType::MOVE_SPEED);
+	LevelUpStat(EPlayerStatType::MOVE_SPEED);
+}
+
+void APlayerCharacter::LevelUpStat(EPlayerStatType Type)
+{
+	StatComponent->LevelUpStat(Type);
+	StatUpdate(Type);
+
+	// 스탯 위젯 업데이트
+	StatWidgetUpdate(Type);
+}
+
+void APlayerCharacter::StatWidgetUpdate(EPlayerStatType Type)
+{
+	if (StatWidget)
+	{
+		StatWidget->SetStatChanged(Type, StatComponent->GetStatLevel(Type));
+		StatWidgetLevelUpPointUpdate();
+	}
+}
+
+void APlayerCharacter::StatWidgetLevelUpPointUpdate()
+{
+	if (StatWidget)
+	{
+		const FString LevelUpPointStr = FString::Printf(TEXT("Level Up Point: %02d"),
+			StatComponent->GetLevelUpPoint());
+
+		StatWidget->GetLevelUpPointText()->SetText(FText::FromString(LevelUpPointStr));
+	}
 }
 
 void APlayerCharacter::StatWidgetToggle()
@@ -524,6 +550,9 @@ void APlayerCharacter::AddExp(float Amount)
 		
 		StatComponent->PlayerLevelUp(LevelUpPoint);
 		CurrentExp = LeftExp;
+
+		// 위젯 텍스트 업데이트
+		StatWidgetLevelUpPointUpdate();
 	}
 }
 
