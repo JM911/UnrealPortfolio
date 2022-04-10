@@ -7,6 +7,7 @@
 
 #include "PlayerCharacter.h"
 #include "Kismet/GameplayStatics.h"
+#include "GameFramework/ProjectileMovementComponent.h"
 
 AAutoPickupItem::AAutoPickupItem()
 {
@@ -15,6 +16,10 @@ AAutoPickupItem::AAutoPickupItem()
 
 	// 이미 가지고 있는 충돌 구체 크기 키우기
 	GetSphereCollision()->InitSphereRadius(200.f);
+
+	// 자동습득 템만 흩뿌려지도록
+	GetItemMovement()->InitialSpeed = 300.f;
+	GetItemMovement()->MaxSpeed = 500.f;
 }
 
 void AAutoPickupItem::BeginPlay()

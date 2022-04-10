@@ -32,6 +32,9 @@ protected:
 	UFUNCTION()
 	void OnAnimMontageEnded(UAnimMontage* Montage, bool bInterrupted);
 
+	// 아이템 드랍
+	void DoDropItem();
+
 
 public:	
 	// Called every frame
@@ -79,6 +82,12 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Combat, meta = (AllowPrivateAccess = "true"))
 	bool bIsAttacking = false;
+
+
+	// 아이템 드랍 관련
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Item, meta = (AllowPrivateAccess = "true"))
+	TArray<TSubclassOf<class AItem>> DropItemClassArray;
+
 
 public:
 	// 공격

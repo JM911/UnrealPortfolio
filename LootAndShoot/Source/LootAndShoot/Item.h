@@ -25,6 +25,10 @@ public:
 
 
 private:
+	// 바닥 충돌용 박스(루트)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+	class UBoxComponent* FloorCollision;
+
 	// 아이템 메쉬
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* ItemMesh;
@@ -33,6 +37,12 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Collision, meta = (AllowPrivateAccess = "true"))
 	class USphereComponent* SphereCollision;
 
+	// 아이템 스폰 시 움직임을 위한 컴포넌트
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, Category = Movement, meta = (AllowPrivateAccess = "true"))
+	class UProjectileMovementComponent* ItemMovement;
+
 public:
-	USphereComponent* GetSphereCollision() const { return SphereCollision; }
+	//FORCEINLINE UBoxComponent* GetBoxCollision() const { return BoxCollision; }
+	FORCEINLINE USphereComponent* GetSphereCollision() const { return SphereCollision; }
+	FORCEINLINE UProjectileMovementComponent* GetItemMovement() const { return ItemMovement; }
 };

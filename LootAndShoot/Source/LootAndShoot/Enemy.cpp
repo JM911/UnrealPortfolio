@@ -11,6 +11,9 @@
 
 #include "EnemyAnimInstance.h"
 
+#include "Item.h"
+#include "GameFramework/ProjectileMovementComponent.h"
+
 
 // Sets default values
 AEnemy::AEnemy()
@@ -88,6 +91,7 @@ void AEnemy::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveC
 		
 		if (CurrentHp <= 0.f) //UKismetMathLibrary::NearlyEqual_FloatFloat(CurrentHp, 0.f))
 		{
+			DoDropItem();
 			Destroy();
 		}
 	}
@@ -111,6 +115,26 @@ void AEnemy::OnAnimMontageEnded(UAnimMontage* Montage, bool bInterrupted)
 	{
 		bIsAttacking = false;
 		OnAttackEnd.Broadcast();
+	}
+}
+
+void AEnemy::DoDropItem()
+{
+	UWorld* World = GetWorld();
+	for (auto ItemClass : DropItemClassArray)
+	{
+		if (World && ItemClass)
+		{
+			// 아이템 위치 지정
+			FRotator SpawnRotation = UKismetMathLibrary::RandomRotator();
+			FVector SpawnLocation = GetActorLocation();
+
+			// 아이템 드랍
+			AItem* SpanwnedItem = World->SpawnActor<AItem>(ItemClass,	SpawnLocation, SpawnRotation);
+
+			// 아이템 다이나믹
+			//SpanwnedItem->GetItemMovement()
+		}
 	}
 }
 

@@ -59,7 +59,7 @@ private:
 	float PickUpSpeed = 5.f;
 
 	// 습득 판정 거리
-	float PickUpDistance = 30.f;
+	float PickUpDistance = 60.f;
 
 	// 타입 (블프 수정)
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Stat, meta = (AllowPrivateAccess = "true"))

@@ -17,6 +17,8 @@
 
 #include "GameFramework/CharacterMovementComponent.h"
 
+#include "Components/ProgressBar.h"
+
 // Sets default values
 APlayerCharacter::APlayerCharacter()
 {
@@ -140,9 +142,6 @@ void APlayerCharacter::LookUp(float Value)
 void APlayerCharacter::FireProjectile()
 {
 	// TODO: 나중에 조준점으로 발사하도록 변경?
-	if (bInventoryToggle || bStatWidgetToggle)
-		return;
-
 	UWorld* World = GetWorld();
 	if (World && MuzzleLocation)
 	{
@@ -167,6 +166,9 @@ void APlayerCharacter::FireProjectile()
 
 void APlayerCharacter::FireButtonPressed()
 {
+	if (bInventoryToggle || bStatWidgetToggle)
+		return;
+
 	if (bReloading)
 		return;
 
@@ -243,10 +245,38 @@ void APlayerCharacter::UpdatePlayerHUD()
 		UPlayerHUD* CurHUD = Cast<UPlayerHUD>(CurGameMode->GetCurrentWidget());
 		if (CurHUD)
 		{
+			// 디버그용 마나 텍스트 업데이트
 			const FString AmmoStr = FString::Printf(TEXT("Ammo %02d/%02d\nTotal %03d"),
 				CurrentMana, MagazineMana, CurrentTotalMana);
-
 			CurHUD->GetAmmoText()->SetText(FText::FromString(AmmoStr));
+
+			// HP, MP, EXP 텍스트
+			const FString HpStr = FString::Printf(TEXT("%d / %d"),
+				(int)CurrentHp, (int)MaxHp);
+			CurHUD->GetHpBarText()->SetText(FText::FromString(HpStr));
+
+			const FString TotalManaStr = FString::Printf(TEXT("%d / %d"),
+				CurrentTotalMana, MaxTotalMana);
+			CurHUD->GetTotalManaBarText()->SetText(FText::FromString(TotalManaStr));
+
+			const FString ManaMagazineStr = FString::Printf(TEXT("%d / %d"),
+				CurrentMana, MagazineMana);
+			CurHUD->GetManaMagazineBarText()->SetText(FText::FromString(ManaMagazineStr));
+
+			const FString ExpStr = FString::Printf(TEXT("%d / %d"),
+				(int)CurrentExp, (int)NextLevelExp);
+			CurHUD->GetExpBarText()->SetText(FText::FromString(ExpStr));
+
+			// HP, MP, EXP 바 업데이트
+			float HpPercent = CurrentHp / MaxHp;
+			float TotalMpPercent = (float)CurrentTotalMana / (float)MaxTotalMana;
+			float MpMagazinePercent = (float)CurrentMana / (float)MagazineMana;
+			float ExpPercent = CurrentExp / NextLevelExp;
+
+			CurHUD->GetHpBar()->SetPercent(HpPercent);
+			CurHUD->GetTotalMpBar()->SetPercent(TotalMpPercent);
+			CurHUD->GetMpMagazineBar()->SetPercent(MpMagazinePercent);
+			CurHUD->GetExpBar()->SetPercent(ExpPercent);
 		}
 	}
 }
