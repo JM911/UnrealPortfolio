@@ -75,6 +75,12 @@ void APlayerCharacter::BeginPlay()
 		InvenWidget = Cast<UPlayerInventoryWidget>(CreateWidget(GetWorld(), InvenWidgetClass));
 	}
 
+	// 인벤토리 위젯 초기화
+	if (InvenWidget)
+	{
+		InvenWidget->MyInit();
+	}
+
 	// 스탯 위젯 생성
 	if (StatWidgetClass)
 	{
@@ -325,12 +331,30 @@ void APlayerCharacter::TakeItem()
 		InvenWidget->InvenQuantityArray.Empty();
 		InvenWidget->InvenItemStatArray.Empty();
 
+		// 아이템 개수 체크
+		int ItemCount = 0;
+
+		// 빈 칸에 넣을 더미 아이템 정보
+		FItemStat DummyItemStat;
+		DummyItemStat.Type = EPotionType::NONE;
+		DummyItemStat.Name = FString("");
+		DummyItemStat.Icon = nullptr;
+		DummyItemStat.Description = FString("");
+
+		// 존재하는 아이템 수 만큼 채워넣기
 		for (auto Item : Inventory)
 		{
-			// TODO: 그냥 아이템 스탯 모두 넘기는 걸로 변경
 			InvenWidget->InvenQuantityArray.Add(Item.Value.Value);
 			InvenWidget->InvenItemStatArray.Add(Item.Value.Key);
+			ItemCount++;
 		}
+
+		// 뒤쪽은 모두 빈칸으로 설정 (더미데이터, 0)
+		//for (int i = ItemCount; i < 18; i++)
+		//{
+		//	InvenWidget->InvenQuantityArray.Add(0);
+		//	InvenWidget->InvenItemStatArray.Add(DummyItemStat);
+		//}
 
 		// 업데이트 여부 전달
 		InvenWidget->bChanged = true;
@@ -447,15 +471,6 @@ void APlayerCharacter::LevelUpFireInterval()
 void APlayerCharacter::LevelUpMoveSpeed()
 {
 	LevelUpStat(EPlayerStatType::MOVE_SPEED);
-}
-
-void APlayerCharacter::LevelUpStat(EPlayerStatType Type)
-{
-	StatComponent->LevelUpStat(Type);
-	StatUpdate(Type);
-
-	// 스탯 위젯 업데이트
-	StatWidgetUpdate(Type);
 }
 
 void APlayerCharacter::StatWidgetUpdate(EPlayerStatType Type)
@@ -582,5 +597,31 @@ void APlayerCharacter::AddExp(float Amount)
 		// 위젯 텍스트 업데이트
 		StatWidgetLevelUpPointUpdate();
 	}
+}
+
+void APlayerCharacter::LevelUpStat(EPlayerStatType Type)
+{
+	StatComponent->LevelUpStat(Type);
+	StatUpdate(Type);
+
+	// 스탯 위젯 업데이트
+	StatWidgetUpdate(Type);
+}
+
+void APlayerCharacter::DrinkPotion(EPotionType Type)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Drink Poition Type: %s"), *GetEStateAsString(Type));
+}
+
+FString APlayerCharacter::GetEStateAsString(EPotionType Type)
+{
+	const UEnum* enumPtr = FindObject<UEnum>(ANY_PACKAGE, TEXT("EPotionType"), true);
+
+	if (enumPtr == nullptr)
+	{
+		return FString("Invalid");
+	}
+
+	return enumPtr->GetNameStringByIndex((int32)Type);
 }
 

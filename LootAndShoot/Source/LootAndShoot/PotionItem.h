@@ -12,6 +12,8 @@
 UENUM(BlueprintType)
 enum class EPotionType : uint8
 {
+	NONE	UMETA(DisplayName = "None"),
+
 	HP		UMETA(DisplayName = "Hp"),
 	MANA_1	UMETA(DisplayName = "Mana_1"),
 

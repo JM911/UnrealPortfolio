@@ -15,7 +15,12 @@ class LOOTANDSHOOT_API UPlayerInventoryWidget : public UUserWidget
 {
 	GENERATED_BODY()
 
-	// 일단 퍼블릭으로 테스트
+protected:
+	// 플레이어 레퍼런스
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Pawn, meta = (AllowPrivateAccess = "true"))
+	//class APlayerCharacter* PlayerPawn;
+
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory, meta = (AllowPrivateAccess = "true"))
 	bool bChanged = false;
@@ -28,6 +33,10 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Inventory, meta = (AllowPrivateAccess = "true"))
 	TArray<FItemStat> InvenItemStatArray;
+
+
+public:
+	void MyInit();
 
 	
 };

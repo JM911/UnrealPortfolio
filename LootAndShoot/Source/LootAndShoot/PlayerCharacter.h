@@ -166,8 +166,17 @@ public:
 	// 경험치 증가 및 레벨 업 체크
 	void AddExp(float Amount);
 
-	// 스탯 관련
+
+	/** 스탯 관련 */
 	UPlayerStatComponent* GetStatComponent() const { return StatComponent; }
 
 	void LevelUpStat(EPlayerStatType Type);
+
+
+	/** 물약 사용 관련 */
+	UFUNCTION(BlueprintCallable)
+	void DrinkPotion(EPotionType Type);
+	
+	// 디버깅용 헬퍼 함수(Enum을 FString으로)
+	FString GetEStateAsString(EPotionType Type);
 };
