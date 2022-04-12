@@ -21,8 +21,11 @@ class LOOTANDSHOOT_API UPlayerStatWidget : public UUserWidget
 //	virtual bool Initialize() override;
 
 protected:
-	//class APlayerCharacter* PlayerPawn;
+	// 플레이어 레퍼런스
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Pawn, meta = (AllowPrivateAccess = "true"))
+	class APlayerCharacter* PlayerPawn;
 
+	// 스탯 업데이트 관련
 	int8 MaxLevel = 0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Stat, meta = (AllowPrivateAccess = "true"))
@@ -51,9 +54,46 @@ protected:
 
 	void SetMaxLevel(int8 Level) { MaxLevel = Level; }
 
-
+	// 위젯 변수들
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* LevelUpPointText;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* HpButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* ManaMagazineButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* TotalManaButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* AttackButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* FireSpeedButton;
+
+	UPROPERTY(meta = (BindWidget))
+	class UButton* MoveSpeedButton;
+
+	// 버튼 액션
+	UFUNCTION()
+	void HpButtonClicked();
+
+	UFUNCTION()
+	void ManaMagazineButtonClicked();
+
+	UFUNCTION()
+	void TotalManaButtonClicked();
+
+	UFUNCTION()
+	void AttackButtonClicked();
+
+	UFUNCTION()
+	void FireSpeedButtonClicked();
+
+	UFUNCTION()
+	void MoveSpeedButtonClicked();
 
 public:
 	void MyInit(int8 Level);

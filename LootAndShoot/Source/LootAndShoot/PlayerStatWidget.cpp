@@ -3,8 +3,10 @@
 
 #include "PlayerStatWidget.h"
 
-//#include "PlayerCharacter.h"
-//#include "Kismet/GameplayStatics.h"
+#include "PlayerCharacter.h"
+#include "Kismet/GameplayStatics.h"
+
+#include "Components/Button.h"
 
 //bool UPlayerStatWidget::Initialize()
 //{
@@ -23,10 +25,53 @@
 //
 //}
 
+void UPlayerStatWidget::HpButtonClicked()
+{
+	PlayerPawn->LevelUpStat(EPlayerStatType::MAX_HP);
+}
+
+void UPlayerStatWidget::ManaMagazineButtonClicked()
+{
+	PlayerPawn->LevelUpStat(EPlayerStatType::MANA_MAGAZINE);
+}
+
+void UPlayerStatWidget::TotalManaButtonClicked()
+{
+	PlayerPawn->LevelUpStat(EPlayerStatType::MANA_TOTAL);
+}
+
+void UPlayerStatWidget::AttackButtonClicked()
+{
+	PlayerPawn->LevelUpStat(EPlayerStatType::ATTACK);
+}
+
+void UPlayerStatWidget::FireSpeedButtonClicked()
+{
+	PlayerPawn->LevelUpStat(EPlayerStatType::FIRE_INTERVAL);
+}
+
+void UPlayerStatWidget::MoveSpeedButtonClicked()
+{
+	PlayerPawn->LevelUpStat(EPlayerStatType::MOVE_SPEED);
+}
+
 void UPlayerStatWidget::MyInit(int8 Level)
 {
-	// 최대 레벨 초기화
+	/** 어딘가에서 반드시 호출해야함! => Level 인자를 받으니 플레이어 캐릭터 BeginPlay가 적절 **/
+
+	// 플레이어 폰 초기화 => 그냥 인자로 받을까?
+	PlayerPawn = Cast<APlayerCharacter>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
+
+	// 최대 레벨 초기화 => 인자로 받지 말고 PlayerPawn에서 꺼내올까?
 	SetMaxLevel(Level);
+
+	// 버튼 바인딩
+	HpButton->OnClicked.AddDynamic(this, &UPlayerStatWidget::HpButtonClicked);
+	ManaMagazineButton->OnClicked.AddDynamic(this, &UPlayerStatWidget::ManaMagazineButtonClicked);
+	TotalManaButton->OnClicked.AddDynamic(this, &UPlayerStatWidget::TotalManaButtonClicked);
+	AttackButton->OnClicked.AddDynamic(this, &UPlayerStatWidget::AttackButtonClicked);
+	FireSpeedButton->OnClicked.AddDynamic(this, &UPlayerStatWidget::FireSpeedButtonClicked);
+	MoveSpeedButton->OnClicked.AddDynamic(this, &UPlayerStatWidget::MoveSpeedButtonClicked);
 }
 
 void UPlayerStatWidget::SetStatChanged(EPlayerStatType Type, int8 Level)

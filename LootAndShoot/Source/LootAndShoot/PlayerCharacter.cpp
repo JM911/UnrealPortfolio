@@ -322,14 +322,12 @@ void APlayerCharacter::TakeItem()
 	// 위젯 정보 갱신
 	if (InvenWidget)
 	{
-		//InvenWidget->InvenTextureArray.Empty();
 		InvenWidget->InvenQuantityArray.Empty();
 		InvenWidget->InvenItemStatArray.Empty();
 
 		for (auto Item : Inventory)
 		{
 			// TODO: 그냥 아이템 스탯 모두 넘기는 걸로 변경
-			//InvenWidget->InvenTextureArray.Add(Item.Value.Key.Icon);
 			InvenWidget->InvenQuantityArray.Add(Item.Value.Value);
 			InvenWidget->InvenItemStatArray.Add(Item.Value.Key);
 		}

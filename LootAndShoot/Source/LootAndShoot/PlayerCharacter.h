@@ -63,8 +63,6 @@ protected:
 	void LevelUpFireInterval();
 	void LevelUpMoveSpeed();
 
-	void LevelUpStat(EPlayerStatType Type);
-
 	void StatWidgetUpdate(EPlayerStatType Type);
 	void StatWidgetLevelUpPointUpdate();
 
@@ -171,4 +169,5 @@ public:
 	// ½ºÅÈ °ü·Ã
 	UPlayerStatComponent* GetStatComponent() const { return StatComponent; }
 
+	void LevelUpStat(EPlayerStatType Type);
 };
