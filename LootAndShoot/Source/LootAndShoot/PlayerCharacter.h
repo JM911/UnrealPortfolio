@@ -52,6 +52,8 @@ protected:
 	bool bInventoryToggle = false;
 	void InventoryWidgetToggle();
 
+	void InventoryWidgetUpdate();
+
 	// 스탯 관련 => 레벨업 부분 리팩토링 가능? (일단은 바인딩때문에 스탯 별로 따로 작성)
 	void StatUpdate(EPlayerStatType Type);
 	void AllStatUpdate();

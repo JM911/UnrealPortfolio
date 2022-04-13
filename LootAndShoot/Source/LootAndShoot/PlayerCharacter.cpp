@@ -325,40 +325,7 @@ void APlayerCharacter::TakeItem()
 		}
 	}
 
-	// 위젯 정보 갱신
-	if (InvenWidget)
-	{
-		InvenWidget->InvenQuantityArray.Empty();
-		InvenWidget->InvenItemStatArray.Empty();
-
-		// 아이템 개수 체크
-		int ItemCount = 0;
-
-		// 빈 칸에 넣을 더미 아이템 정보
-		FItemStat DummyItemStat;
-		DummyItemStat.Type = EPotionType::NONE;
-		DummyItemStat.Name = FString("");
-		DummyItemStat.Icon = nullptr;
-		DummyItemStat.Description = FString("");
-
-		// 존재하는 아이템 수 만큼 채워넣기
-		for (auto Item : Inventory)
-		{
-			InvenWidget->InvenQuantityArray.Add(Item.Value.Value);
-			InvenWidget->InvenItemStatArray.Add(Item.Value.Key);
-			ItemCount++;
-		}
-
-		// 뒤쪽은 모두 빈칸으로 설정 (더미데이터, 0)
-		//for (int i = ItemCount; i < 18; i++)
-		//{
-		//	InvenWidget->InvenQuantityArray.Add(0);
-		//	InvenWidget->InvenItemStatArray.Add(DummyItemStat);
-		//}
-
-		// 업데이트 여부 전달
-		InvenWidget->bChanged = true;
-	}
+	InventoryWidgetUpdate();
 }
 
 void APlayerCharacter::InventoryWidgetToggle()
@@ -385,6 +352,44 @@ void APlayerCharacter::InventoryWidgetToggle()
 			// 마우스 보이게
 			GetWorld()->GetFirstPlayerController()->bShowMouseCursor = true;
 		}
+	}
+}
+
+void APlayerCharacter::InventoryWidgetUpdate()
+{
+	// 위젯 정보 갱신
+	if (InvenWidget)
+	{
+		InvenWidget->InvenQuantityArray.Empty();
+		InvenWidget->InvenItemStatArray.Empty();
+
+		// 아이템 개수 체크
+		int ItemCount = 0;
+
+		// 빈 칸에 넣을 더미 아이템 정보
+		FItemStat DummyItemStat;
+		DummyItemStat.Type = EPotionType::NONE;
+		DummyItemStat.Name = FString("");
+		DummyItemStat.Icon = nullptr;
+		DummyItemStat.Description = FString("");
+
+		// 존재하는 아이템 수 만큼 채워넣기
+		for (auto Item : Inventory)
+		{
+			InvenWidget->InvenQuantityArray.Add(Item.Value.Value);
+			InvenWidget->InvenItemStatArray.Add(Item.Value.Key);
+			ItemCount++;
+		}
+
+		// 뒤쪽은 모두 빈칸으로 설정 (더미데이터, 0)
+		for (int i = ItemCount; i < 18; i++)
+		{
+			InvenWidget->InvenQuantityArray.Add(0);
+			InvenWidget->InvenItemStatArray.Add(DummyItemStat);
+		}
+
+		// 업데이트 여부 전달
+		InvenWidget->bChanged = true;
 	}
 }
 
@@ -611,6 +616,21 @@ void APlayerCharacter::LevelUpStat(EPlayerStatType Type)
 void APlayerCharacter::DrinkPotion(EPotionType Type)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Drink Poition Type: %s"), *GetEStateAsString(Type));
+
+	if (Inventory.Find(Type) && Inventory[Type].Value > 0)
+	{
+		// 해당 아이템 수량 - 1
+		Inventory[Type].Value--;
+
+		// 수량 0이면 제거
+		if (Inventory[Type].Value <= 0)
+		{
+			Inventory.Remove(Type);
+		}
+
+		// 인벤토리 위젯 업데이트
+		InventoryWidgetUpdate();
+	}
 }
 
 FString APlayerCharacter::GetEStateAsString(EPotionType Type)
