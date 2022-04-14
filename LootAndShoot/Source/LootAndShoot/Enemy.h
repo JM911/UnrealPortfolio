@@ -89,7 +89,23 @@ private:
 	TArray<TSubclassOf<class AItem>> DropItemClassArray;
 
 
+	// 거리 관련 체크용 변수
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Distance, meta = (AllowPrivateAccess = "true"))
+	float CanAttackDistance = 200.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Distance, meta = (AllowPrivateAccess = "true"))
+	float SearchDistance = 500.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Distance, meta = (AllowPrivateAccess = "true"))
+	float WidgetVisibleDistance = 1000.f;
+	
+
+
 public:
+	// 거리 관련 Get
+	float GetCanAttackDistance() const { return CanAttackDistance; }
+	float GetSearchDistance() const { return SearchDistance; }
+
 	// 공격
 	void Attack();
 	FOnAttackEnd OnAttackEnd;

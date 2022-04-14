@@ -31,6 +31,15 @@ void AEnemyAIController::OnPossess(APawn* InPawn)
 
 	//GetWorld()->GetTimerManager().SetTimer(TimerHandle, this, &AEnemyAIController::RandomMove, 2.f, true);
 
+	// 최초 위치 저장 (돌아가는 용도)
+	UBlackboardComponent* MyBlackBoardComponent = GetBlackboardComponent();
+	if (MyBlackBoardComponent)
+	{
+		FVector PawnPos = InPawn->GetActorLocation();
+
+		MyBlackBoardComponent->SetValueAsVector(FName(TEXT("OriginalPos")), PawnPos);
+	}
+
 	if (UseBlackboard(BlackboardData, Blackboard))
 	{
 		if (RunBehaviorTree(BehaviorTree))
