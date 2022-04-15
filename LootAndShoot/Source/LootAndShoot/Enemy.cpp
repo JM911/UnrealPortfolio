@@ -15,6 +15,7 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 
 #include "DrawDebugHelpers.h"
+#include "PlayerCharacter.h"
 
 
 // Sets default values
@@ -114,14 +115,15 @@ void AEnemy::Attack()
 
 void AEnemy::AttackCheck()
 {
-	FHitResult HitResult;
+	//FHitResult HitResult;
+	TArray<FHitResult> HitResults;
 	FCollisionQueryParams Params(NAME_None, false, this);
 
 	float AttackRange = 100.f;
 	float AttackRadius = 50.f;
 
-	bool bResult = GetWorld()->SweepSingleByChannel(
-		OUT HitResult,
+	bool bResult = GetWorld()->SweepMultiByChannel(
+		OUT HitResults,
 		GetActorLocation(),
 		GetActorLocation() + GetActorForwardVector() * AttackRange,
 		FQuat::Identity,
@@ -142,14 +144,23 @@ void AEnemy::AttackCheck()
 
 	DrawDebugCapsule(GetWorld(), Center, HalfHeight, AttackRadius, Rotation, DrawColor, false, 2.f);
 
-	if (bResult && HitResult.Actor.IsValid())
+	if (bResult && HitResults.Num() > 0) //&& HitResult.Actor.IsValid())
 	{
-		UE_LOG(LogTemp, Log, TEXT("Hit Actor: %s"), *HitResult.Actor->GetName());
+		//UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *HitResult.Actor->GetName());
 
 		//FDamageEvent DamageEvent;
 		//HitResult.Actor->TakeDamage(Stat->GetAttack(), DamageEvent, GetController(), this);
 
-		// TODO: 플레이어의 데미지 입는 함수 호출
+		// 플레이어 데미지
+		for (auto HitResult : HitResults)
+		{
+			auto HitPlayer = Cast<APlayerCharacter>(HitResult.Actor);
+
+			if (HitPlayer)
+			{
+				HitPlayer->TakeDamage(AttackPoint);
+			}
+		}
 	}
 }
 

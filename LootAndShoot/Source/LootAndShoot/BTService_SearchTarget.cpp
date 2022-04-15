@@ -39,7 +39,7 @@ void UBTService_SearchTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
 		FCollisionShape::MakeSphere(SearchRadius),
 		QueryParams);
 
-	UE_LOG(LogTemp, Warning, TEXT("Searching Target"));
+	//UE_LOG(LogTemp, Warning, TEXT("Searching Target"));
 
 	if (bResult)
 	{

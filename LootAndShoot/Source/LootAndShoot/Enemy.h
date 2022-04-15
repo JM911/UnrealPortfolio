@@ -64,11 +64,14 @@ private:
 
 
 	// 전투 관련
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Collision, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat, meta = (AllowPrivateAccess = "true"))
 	float CurrentHp = 100.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Collision, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Stat, meta = (AllowPrivateAccess = "true"))
 	float MaxHp = 100.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Stat, meta = (AllowPrivateAccess = "true"))
+	float AttackPoint = 10.f;
 
 	UPROPERTY()
 	class UEnemyAnimInstance* AnimInstanceBody;
@@ -94,8 +97,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Distance, meta = (AllowPrivateAccess = "true"))
 	float WidgetVisibleDistance = 1000.f;
-	
-
 
 public:
 	// 거리 관련 Get

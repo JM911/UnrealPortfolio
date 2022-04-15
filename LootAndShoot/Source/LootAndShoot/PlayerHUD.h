@@ -15,8 +15,8 @@ class LOOTANDSHOOT_API UPlayerHUD : public UUserWidget
 	GENERATED_BODY()
 
 private:
-	UPROPERTY(meta = (BindWidget))
-	class UTextBlock* AmmoText;
+	//UPROPERTY(meta = (BindWidget))
+	//class UTextBlock* AmmoText;
 
 	UPROPERTY(meta = (BindWidget))
 	class UTextBlock* HpBarText;
@@ -43,7 +43,7 @@ private:
 	class UProgressBar* ExpBar;
 
 public:
-	FORCEINLINE UTextBlock* GetAmmoText() const { return AmmoText; }
+	//FORCEINLINE UTextBlock* GetAmmoText() const { return AmmoText; }
 	FORCEINLINE UTextBlock* GetHpBarText() const { return HpBarText; }
 	FORCEINLINE UTextBlock* GetTotalManaBarText() const { return TotalManaBarText; }
 	FORCEINLINE UTextBlock* GetManaMagazineBarText() const { return ManaMagazineBarText; }

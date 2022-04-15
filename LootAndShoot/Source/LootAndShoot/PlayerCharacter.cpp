@@ -79,6 +79,8 @@ void APlayerCharacter::BeginPlay()
 	if (InvenWidget)
 	{
 		InvenWidget->MyInit();
+		InvenWidget->AddToViewport();
+		InvenWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
 
 	// 스탯 위젯 생성
@@ -89,7 +91,7 @@ void APlayerCharacter::BeginPlay()
 
 	// 테스트용 레벨 업 포인트 지급
 	StatComponent->PlayerLevelUp(30);
-	UE_LOG(LogTemp, Warning, TEXT("Current Stat Point: %d"), StatComponent->GetLevelUpPoint());
+	//UE_LOG(LogTemp, Warning, TEXT("Current Stat Point: %d"), StatComponent->GetLevelUpPoint());
 
 	// 스탯 위젯 초기화
 	if (StatWidget)
@@ -252,9 +254,9 @@ void APlayerCharacter::UpdatePlayerHUD()
 		if (CurHUD)
 		{
 			// 디버그용 마나 텍스트 업데이트
-			const FString AmmoStr = FString::Printf(TEXT("Ammo %02d/%02d\nTotal %03d"),
-				CurrentMana, MagazineMana, CurrentTotalMana);
-			CurHUD->GetAmmoText()->SetText(FText::FromString(AmmoStr));
+			//const FString AmmoStr = FString::Printf(TEXT("Ammo %02d/%02d\nTotal %03d"),
+			//	CurrentMana, MagazineMana, CurrentTotalMana);
+			//CurHUD->GetAmmoText()->SetText(FText::FromString(AmmoStr));
 
 			// HP, MP, EXP 텍스트
 			const FString HpStr = FString::Printf(TEXT("%d / %d"),
@@ -338,7 +340,8 @@ void APlayerCharacter::InventoryWidgetToggle()
 	{
 		if (bInventoryToggle)
 		{
-			InvenWidget->RemoveFromParent();
+			//InvenWidget->RemoveFromParent();
+			InvenWidget->SetVisibility(ESlateVisibility::Hidden);
 			bInventoryToggle = false;
 
 			// 마우스 안보이게
@@ -346,7 +349,8 @@ void APlayerCharacter::InventoryWidgetToggle()
 		}
 		else
 		{
-			InvenWidget->AddToViewport();
+			//InvenWidget->AddToViewport();
+			InvenWidget->SetVisibility(ESlateVisibility::Visible);
 			bInventoryToggle = true;
 
 			// 마우스 보이게
@@ -424,14 +428,14 @@ void APlayerCharacter::StatUpdate(EPlayerStatType Type)
 			break;
 		}
 
-		UE_LOG(LogTemp, Warning, TEXT("%d / %d, %d, %d, %d, %d, %d"),
-			StatComponent->GetLevelUpPoint(),
-			StatComponent->GetStatLevel(EPlayerStatType::MAX_HP),
-			StatComponent->GetStatLevel(EPlayerStatType::MANA_MAGAZINE),
-			StatComponent->GetStatLevel(EPlayerStatType::MANA_TOTAL),
-			StatComponent->GetStatLevel(EPlayerStatType::ATTACK),
-			StatComponent->GetStatLevel(EPlayerStatType::FIRE_INTERVAL),
-			StatComponent->GetStatLevel(EPlayerStatType::MOVE_SPEED));
+		//UE_LOG(LogTemp, Warning, TEXT("%d / %d, %d, %d, %d, %d, %d"),
+		//	StatComponent->GetLevelUpPoint(),
+		//	StatComponent->GetStatLevel(EPlayerStatType::MAX_HP),
+		//	StatComponent->GetStatLevel(EPlayerStatType::MANA_MAGAZINE),
+		//	StatComponent->GetStatLevel(EPlayerStatType::MANA_TOTAL),
+		//	StatComponent->GetStatLevel(EPlayerStatType::ATTACK),
+		//	StatComponent->GetStatLevel(EPlayerStatType::FIRE_INTERVAL),
+		//	StatComponent->GetStatLevel(EPlayerStatType::MOVE_SPEED));
 	}
 }
 
@@ -525,6 +529,25 @@ void APlayerCharacter::StatWidgetToggle()
 	}
 }
 
+void APlayerCharacter::SetPlayerInvincible(float InvincibleTime)
+{
+	// 이미 무적이면 스킵 => 아예 아이템 사용이 안되도록 할까?
+	if (bInvincible)
+		return;
+	
+	// bool 변수 설정
+	bInvincible = true;
+
+	// 타이머 설정
+	FTimerDelegate TimerCallback;
+	TimerCallback.BindLambda([this] {
+		bInvincible = false;
+		}
+	);
+
+	GetWorld()->GetTimerManager().SetTimer(InvincibleTimer, TimerCallback, InvincibleTime, false);
+}
+
 // Called every frame
 void APlayerCharacter::Tick(float DeltaTime)
 {
@@ -562,12 +585,12 @@ void APlayerCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAction("Stat", IE_Pressed, this, &APlayerCharacter::StatWidgetToggle);
 
-	PlayerInputComponent->BindAction("Test_1", IE_Pressed, this, &APlayerCharacter::LevelUpMaxHp);
-	PlayerInputComponent->BindAction("Test_2", IE_Pressed, this, &APlayerCharacter::LevelUpManaMagazine);
-	PlayerInputComponent->BindAction("Test_3", IE_Pressed, this, &APlayerCharacter::LevelUpManaToTal);
-	PlayerInputComponent->BindAction("Test_4", IE_Pressed, this, &APlayerCharacter::LevelUpAttack);
-	PlayerInputComponent->BindAction("Test_5", IE_Pressed, this, &APlayerCharacter::LevelUpFireInterval);
-	PlayerInputComponent->BindAction("Test_6", IE_Pressed, this, &APlayerCharacter::LevelUpMoveSpeed);
+	//PlayerInputComponent->BindAction("Test_1", IE_Pressed, this, &APlayerCharacter::LevelUpMaxHp);
+	//PlayerInputComponent->BindAction("Test_2", IE_Pressed, this, &APlayerCharacter::LevelUpManaMagazine);
+	//PlayerInputComponent->BindAction("Test_3", IE_Pressed, this, &APlayerCharacter::LevelUpManaToTal);
+	//PlayerInputComponent->BindAction("Test_4", IE_Pressed, this, &APlayerCharacter::LevelUpAttack);
+	//PlayerInputComponent->BindAction("Test_5", IE_Pressed, this, &APlayerCharacter::LevelUpFireInterval);
+	//PlayerInputComponent->BindAction("Test_6", IE_Pressed, this, &APlayerCharacter::LevelUpMoveSpeed);
 }
 
 void APlayerCharacter::AddHp(float Amount)
@@ -591,7 +614,7 @@ void APlayerCharacter::AddMana(float Amount)
 void APlayerCharacter::AddExp(float Amount)
 {
 	CurrentExp += Amount;
-	if (CurrentExp > NextLevelExp)
+	if (CurrentExp >= NextLevelExp)
 	{
 		int8 LevelUpPoint = CurrentExp / NextLevelExp;
 		float LeftExp = CurrentExp - (LevelUpPoint * NextLevelExp);
@@ -615,7 +638,7 @@ void APlayerCharacter::LevelUpStat(EPlayerStatType Type)
 
 void APlayerCharacter::DrinkPotion(EPotionType Type)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Drink Poition Type: %s"), *GetEStateAsString(Type));
+	//UE_LOG(LogTemp, Warning, TEXT("Drink Poition Type: %s"), *GetEStateAsString(Type));
 
 	if (Inventory.Find(Type) && Inventory[Type].Value > 0)
 	{
@@ -630,6 +653,20 @@ void APlayerCharacter::DrinkPotion(EPotionType Type)
 
 		// 인벤토리 위젯 업데이트
 		InventoryWidgetUpdate();
+
+		// 실제 사용 효과
+		switch (Type)
+		{
+		case EPotionType::HP:
+			AddHp(50.f);
+			break;
+		case EPotionType::MANA_1:
+			AddMana(50);
+			break;
+		case EPotionType::BUFF_1:
+			SetPlayerInvincible();
+			break;
+		}
 	}
 }
 
@@ -643,5 +680,23 @@ FString APlayerCharacter::GetEStateAsString(EPotionType Type)
 	}
 
 	return enumPtr->GetNameStringByIndex((int32)Type);
+}
+
+void APlayerCharacter::TakeDamage(float Amount)
+{
+	// 무적 버프면 스킵
+	if (bInvincible)
+		return;
+
+	// 체력 감소
+	CurrentHp -= Amount;
+
+	// 보정
+	if (CurrentHp <= 0.f)
+	{
+		CurrentHp = 0.f;
+
+		// TODO: 죽음 구현
+	}
 }
 

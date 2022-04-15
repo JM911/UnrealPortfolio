@@ -71,6 +71,12 @@ protected:
 	bool bStatWidgetToggle = false;
 	void StatWidgetToggle();
 
+	// 버프 관련
+	bool bInvincible = false;
+	FTimerHandle InvincibleTimer;
+
+	void SetPlayerInvincible(float InvincibleTime = 10.f);	// 물약 정보에서 가져올까?
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -181,4 +187,7 @@ public:
 	
 	// 디버깅용 헬퍼 함수(Enum을 FString으로)
 	FString GetEStateAsString(EPotionType Type);
+
+	/* 데미지 */
+	void TakeDamage(float Amount);
 };
