@@ -142,7 +142,7 @@ void AEnemy::AttackCheck()
 	else
 		DrawColor = FColor::Red;
 
-	DrawDebugCapsule(GetWorld(), Center, HalfHeight, AttackRadius, Rotation, DrawColor, false, 2.f);
+	//DrawDebugCapsule(GetWorld(), Center, HalfHeight, AttackRadius, Rotation, DrawColor, false, 2.f);
 
 	if (bResult && HitResults.Num() > 0) //&& HitResult.Actor.IsValid())
 	{

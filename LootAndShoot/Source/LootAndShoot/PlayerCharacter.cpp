@@ -113,6 +113,16 @@ void APlayerCharacter::BeginPlay()
 		StatWidgetLevelUpPointUpdate();
 	}
 
+	// 장전 위젯 생성 및 초기화
+	if (RelaodWidgetClass)
+	{
+		RelaodWidget = Cast<UUserWidget>(CreateWidget(GetWorld(), RelaodWidgetClass));
+		if (RelaodWidget)
+		{
+			RelaodWidget->AddToViewport();
+			RelaodWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
 }
 
 void APlayerCharacter::MoveForward(float Value)
@@ -558,6 +568,24 @@ void APlayerCharacter::Tick(float DeltaTime)
 	
 	// 탄약 관련 UI 업데이트
 	UpdatePlayerHUD();
+
+	// 장전 HUD 업데이트용 변수 계산
+	if (bReloading)
+	{
+		CurrentReloadTime += DeltaTime;
+		if (RelaodWidget && RelaodWidget->GetVisibility() == ESlateVisibility::Hidden)
+		{
+			RelaodWidget->SetVisibility(ESlateVisibility::Visible);
+		}
+	}
+	else
+	{
+		CurrentReloadTime = 0.f;
+		if (RelaodWidget && RelaodWidget->GetVisibility() == ESlateVisibility::Visible)
+		{
+			RelaodWidget->SetVisibility(ESlateVisibility::Hidden);
+		}
+	}
 }
 
 // Called to bind functionality to input

@@ -42,7 +42,7 @@ protected:
 	void Reload();
 	void ReloadEnd();
 
-	// 탄약 관련 UI 업데이트
+	// 플레이어 HUD 업데이트
 	void UpdatePlayerHUD();
 
 	// 아이템 관련
@@ -119,8 +119,10 @@ private:
 
 	// 장전 관련 변수
 	bool bReloading = false;
-	float ReloadTime = 0.5f;
+	float ReloadTime = 1.f;
 	FTimerHandle ReloadTimer;
+
+	float CurrentReloadTime = 0.f;	// 장전 위젯 전달용
 
 
 	// 아이템 인벤토리 관련
@@ -162,6 +164,13 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Item, meta = (AllowPrivateAccess = "true"))
 	class UPlayerStatWidget* StatWidget;
 
+	// 장전 위젯
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Item, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<class UUserWidget> RelaodWidgetClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Item, meta = (AllowPrivateAccess = "true"))
+	class UUserWidget* RelaodWidget;
+
 
 public:
 	/** 즉시 습득 아이템 관련 함수들 */
@@ -190,4 +199,7 @@ public:
 
 	/* 데미지 */
 	void TakeDamage(float Amount);
+
+	UFUNCTION(BlueprintCallable)
+	float GetCurrentReloadPercent() const { return CurrentReloadTime / ReloadTime; }
 };
