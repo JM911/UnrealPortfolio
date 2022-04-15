@@ -189,6 +189,13 @@ void AEnemy::DoDropItem()
 
 			// 아이템 다이나믹
 			//SpanwnedItem->GetItemMovement()
+			
+			// 포션일 경우 회전X
+			auto SpawnedPotion = Cast<APotionItem>(SpanwnedItem);
+			if (SpawnedPotion)
+			{
+				SpawnedPotion->SetActorRotation(FQuat::Identity);
+			}
 		}
 	}
 }
