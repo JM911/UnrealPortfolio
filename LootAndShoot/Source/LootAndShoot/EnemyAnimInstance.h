@@ -9,6 +9,9 @@
 /**
  * 
  */
+// 공격 판정 관련 델리게이트
+DECLARE_MULTICAST_DELEGATE(FOnAttackHit);
+
 UCLASS()
 class LOOTANDSHOOT_API UEnemyAnimInstance : public UAnimInstance
 {
@@ -35,8 +38,14 @@ private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat, Meta = (AllowPrivateAccess = true))
 	UAnimMontage* AttackMontage;
 
+	// 공격 판정 관련 애님 노티파이
+	UFUNCTION()
+	void AnimNotify_EnemyAttackHit();
+
 		
 public:
 	void PlayAttackMontage();
 	void AttackMontageJumpToSection();
+
+	FOnAttackHit OnAttackHit;
 };

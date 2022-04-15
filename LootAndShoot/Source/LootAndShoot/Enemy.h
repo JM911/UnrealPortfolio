@@ -28,10 +28,6 @@ protected:
 	UFUNCTION()
 	void OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& Hit);
 
-	// 애니메이션
-	UFUNCTION()
-	void OnAnimMontageEnded(UAnimMontage* Montage, bool bInterrupted);
-
 	// 아이템 드랍
 	void DoDropItem();
 
@@ -109,4 +105,11 @@ public:
 	// 공격
 	void Attack();
 	FOnAttackEnd OnAttackEnd;
+
+	// 애니메이션
+	UFUNCTION()
+	void OnAnimMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	UFUNCTION()
+	void AttackCheck();
 };

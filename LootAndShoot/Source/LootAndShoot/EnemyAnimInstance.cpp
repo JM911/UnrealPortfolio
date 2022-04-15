@@ -33,6 +33,12 @@ void UEnemyAnimInstance::NativeInitializeAnimation()
 	OwnerCharacter = Cast<AEnemy>(TryGetPawnOwner());
 }
 
+void UEnemyAnimInstance::AnimNotify_EnemyAttackHit()
+{
+	//UE_LOG(LogTemp, Log, TEXT("AnimNotify_AttackHit"));
+	OnAttackHit.Broadcast();
+}
+
 void UEnemyAnimInstance::PlayAttackMontage()
 {
 	Montage_Play(AttackMontage, 1.f);
@@ -41,5 +47,5 @@ void UEnemyAnimInstance::PlayAttackMontage()
 void UEnemyAnimInstance::AttackMontageJumpToSection()
 {
 	Montage_JumpToSection(FName("Attack"), AttackMontage);
-	UE_LOG(LogTemp, Warning, TEXT("Attack Montage Jump On"));
+	//UE_LOG(LogTemp, Warning, TEXT("Attack Montage Jump On"));
 }

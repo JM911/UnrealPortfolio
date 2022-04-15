@@ -61,7 +61,8 @@ void UBTService_SearchTarget::TickNode(UBehaviorTreeComponent& OwnerComp, uint8*
 	}
 	else
 	{
-		OwnerComp.GetBlackboardComponent()->SetValueAsObject(FName(TEXT("Target")), nullptr);
+		// 타겟을 한 번 설정하고 나면 인식 범위를 벗어나도 지우지 않고 계속 타겟으로 들고 있도록
+		//OwnerComp.GetBlackboardComponent()->SetValueAsObject(FName(TEXT("Target")), nullptr);
 
 		//DrawDebugSphere(World, Center, SearchRadius, 16, FColor::Red, false, 0.2f);
 	}
