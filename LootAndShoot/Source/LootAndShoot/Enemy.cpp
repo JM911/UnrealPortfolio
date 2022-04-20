@@ -106,10 +106,18 @@ void AEnemy::Attack()
 	if (bIsAttacking)
 		return;
 
-	AnimInstanceBody->PlayAttackMontage();
-	AnimInstanceHead->PlayAttackMontage();
-	AnimInstanceBody->AttackMontageJumpToSection();
-	AnimInstanceHead->AttackMontageJumpToSection();
+	if (AnimInstanceBody)
+	{
+		AnimInstanceBody->PlayAttackMontage();
+		AnimInstanceBody->AttackMontageJumpToSection();
+	}
+
+	if (AnimInstanceHead)
+	{
+		AnimInstanceHead->PlayAttackMontage();
+		AnimInstanceHead->AttackMontageJumpToSection();
+	}
+
 	bIsAttacking = true;
 }
 
@@ -142,7 +150,7 @@ void AEnemy::AttackCheck()
 	else
 		DrawColor = FColor::Red;
 
-	//DrawDebugCapsule(GetWorld(), Center, HalfHeight, AttackRadius, Rotation, DrawColor, false, 2.f);
+	DrawDebugCapsule(GetWorld(), Center, HalfHeight, AttackRadius, Rotation, DrawColor, false, 2.f);
 
 	if (bResult && HitResults.Num() > 0) //&& HitResult.Actor.IsValid())
 	{

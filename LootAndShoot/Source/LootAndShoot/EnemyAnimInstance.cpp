@@ -41,11 +41,17 @@ void UEnemyAnimInstance::AnimNotify_EnemyAttackHit()
 
 void UEnemyAnimInstance::PlayAttackMontage()
 {
-	Montage_Play(AttackMontage, 1.f);
+	if (AttackMontage)
+	{
+		Montage_Play(AttackMontage, 1.f);
+	}
 }
 
 void UEnemyAnimInstance::AttackMontageJumpToSection()
 {
-	Montage_JumpToSection(FName("Attack"), AttackMontage);
-	//UE_LOG(LogTemp, Warning, TEXT("Attack Montage Jump On"));
+	if (AttackMontage)
+	{
+		Montage_JumpToSection(FName("Attack"), AttackMontage);
+		//UE_LOG(LogTemp, Warning, TEXT("Attack Montage Jump On"));
+	}
 }
